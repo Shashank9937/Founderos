@@ -4,6 +4,7 @@ const STORAGE_KEY = 'founder_os_v1';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
+  { id: 'manual', label: 'Founder Manual', icon: '📘' },
   { id: 'execution', label: 'Execution Tracker', icon: '🧭' },
   { id: 'learning', label: 'Learning Tracker', icon: '📚' },
   { id: 'decisions', label: 'Decision Log', icon: '🧠' },
@@ -24,6 +25,159 @@ const RHYTHM_DAYS = [
 const DECISION_CATEGORIES = ['Product', 'Growth', 'Sales', 'Hiring', 'Fundraising', 'Finance', 'Operations'];
 
 const PLAYBOOK_TYPES = ['Sales', 'Growth', 'Product', 'Fundraising', 'Hiring'];
+
+const BRUTAL_TRUTHS = [
+  'Busy is not productive. Real work means decisions, hypothesis tests, and customer conversations.',
+  'You do not have an idea problem. You have a validation problem.',
+  'Family business is an asset and an anchor. Use it for leverage, not excuses.',
+  'You likely have enough time. The bottleneck is focus quality.',
+  'Climate / biomass / carbon are marathon markets. Learn deeply before scaling.',
+  'Overthinking is procrastination in a suit. Ship, learn, iterate.',
+  'At 26, learning velocity is your biggest asset. Optimize for rapid feedback loops.'
+];
+
+const DAILY_EXECUTION_SCHEDULE = [
+  { id: '0500', time: '5:00-5:20', block: 'Ignition', action: 'Journal yesterday win, today #1 priority, one risk to manage.', output: 'Day mission clarity' },
+  { id: '0520', time: '5:20-6:00', block: 'Deep Read / Learn', action: 'Focused reading on biomass, carbon, logistics, or regulation. No social/news.', output: '1 insight logged' },
+  { id: '0600', time: '6:00-7:00', block: 'Physical', action: 'Gym/run/walk. No exceptions.', output: 'Physical output complete' },
+  { id: '0700', time: '7:00-8:00', block: 'Family Business Review', action: 'Handle only critical decisions. Delegate recurring operations.', output: 'Ops handed off by 8 AM' },
+  { id: '0800', time: '8:00-10:00', block: 'Deep Work Block 1', action: 'Single highest-impact founder task. Zero interruptions.', output: '1 concrete output' },
+  { id: '1000', time: '10:00-11:00', block: 'Family Business Execution', action: 'Batch calls, meetings, approvals.', output: 'Batched execution complete' },
+  { id: '1100', time: '11:00-1:00', block: 'Deep Work Block 2', action: 'Validation calls, research, framework building, modeling.', output: '1 concrete output' },
+  { id: '1300', time: '1:00-2:00', block: 'Lunch + Recovery', action: 'Eat, walk, no screens for reset.', output: 'Cognitive reset complete' },
+  { id: '1400', time: '2:00-4:00', block: 'Deep Work Block 3', action: 'Outreach, expert calls, writing, mapping.', output: '1 concrete output' },
+  { id: '1600', time: '4:00-5:00', block: 'Family Business + Admin', action: 'Close admin in 1 hour max.', output: 'Admin closed' },
+  { id: '1700', time: '5:00-6:30', block: 'Field Work / Learning', action: 'Visit factories, suppliers, farmers, logistics hubs, or competitors.', output: '1 field observation logged' },
+  { id: '1830', time: '6:30-7:30', block: 'Secondary Research', action: 'Research reports, expert sources, structured notes.', output: '1 data point logged' },
+  { id: '2030', time: '8:30-9:30', block: 'Daily Review + Planning', action: 'Update dashboard, wins/learnings, next top 3 outputs.', output: 'System updated' },
+  { id: '2130', time: '9:30', block: 'Shutdown', action: 'Devices down, sleep protocol.', output: 'Shutdown complete' }
+];
+
+const WEEKLY_OPERATING_MODEL = [
+  { id: 'monday', day: 'Monday', theme: 'Strategy Day', focus: 'Set weekly goals, top 3 hypotheses, key contacts.', output: 'Weekly plan locked by 9 AM' },
+  { id: 'tuesday', day: 'Tuesday', theme: 'Market Intel', focus: 'Research one segment, map competitors, identify customers.', output: 'Market map updated' },
+  { id: 'wednesday', day: 'Wednesday', theme: 'Customer Day', focus: 'Run minimum 3 customer or expert conversations.', output: '3 call notes + insights' },
+  { id: 'thursday', day: 'Thursday', theme: 'Validation Day', focus: 'Test one hypothesis and build one-page case.', output: 'Hypothesis confirmed or killed' },
+  { id: 'friday', day: 'Friday', theme: 'Build Day', focus: 'Create one tangible artifact.', output: '1 artifact created' },
+  { id: 'saturday', day: 'Saturday', theme: 'Reflection + Learning', focus: 'Review week and identify bottlenecks.', output: 'Weekly scorecard complete' },
+  { id: 'sunday', day: 'Sunday', theme: 'Reset', focus: 'Recovery, physical, family, unrelated reading.', output: 'Cognitive reset complete' }
+];
+
+const VALIDATION_FUNNEL = [
+  { id: 'pain', stage: 'Pain Mining', action: 'Interview operators and isolate expensive recurring pain.', timeBox: 'Week 1-2', pass: '3+ independent pain confirmations', kill: 'Pain is minor or already solved' },
+  { id: 'market', stage: 'Market Sizing', action: 'Bottom-up TAM and willingness-to-pay economics.', timeBox: 'Week 3', pass: 'TAM > ₹500Cr and ACV > ₹2L', kill: 'Fragmented or too-small market' },
+  { id: 'solution', stage: 'Solution Hypothesis', action: 'Test a simple one-page solution concept verbally.', timeBox: 'Week 4', pass: 'Strong pull response from target users', kill: 'Lukewarm “interesting” feedback' },
+  { id: 'wtp', stage: 'Willingness to Pay', action: 'Ask for LOI, pilot commitment, or pre-payment.', timeBox: 'Week 5-6', pass: '2+ commitments', kill: 'Positive feedback but no payment' },
+  { id: 'pilot', stage: 'Pilot Execution', action: 'Run manual founder-led pilot for initial customers.', timeBox: 'Week 7-8', pass: 'Renewal or referral + NPS > 8', kill: 'Pilot churn and no referral' }
+];
+
+const DISTRACTION_AUDIT = [
+  { id: 'social', type: 'Social media scroll', protocol: 'Phone out of room during deep work. Social window only in evening.' },
+  { id: 'reactive-msg', type: 'Reactive messages', protocol: 'Check windows only: morning, midday, evening.' },
+  { id: 'family-fire', type: 'Family business fire drills', protocol: 'Escalation filter. Delegate first-response owner.' },
+  { id: 'research-rabbit', type: 'Research rabbit holes', protocol: '45-min research then forced written output.' },
+  { id: 'pseudo-work', type: 'Pseudo-productivity', protocol: 'If no customer/market signal, deprioritize for today.' },
+  { id: 'meeting-creep', type: 'Meeting creep', protocol: 'No agenda = no meeting. Prefer async.' },
+  { id: 'idea-loop', type: 'Idea journaling without action', protocol: '15-min max then one test action within 24h.' },
+  { id: 'news', type: 'News consumption', protocol: 'Scheduled slot only. Not during execution windows.' }
+];
+
+const DAILY_METRIC_TEMPLATE = [
+  { id: 'd_convos', metric: 'Customer/Expert conversations', target: '1/day minimum' },
+  { id: 'd_insight', metric: 'New market insight logged', target: '1/day' },
+  { id: 'd_hypothesis', metric: 'Hypothesis test actions', target: '1/day' },
+  { id: 'd_deepwork', metric: 'Deep work hours (uninterrupted)', target: '4 hrs minimum' },
+  { id: 'd_social', metric: 'Social media consumed (minutes)', target: '0 during work' },
+  { id: 'd_family', metric: 'Family business handled by 8 AM', target: 'Yes/No' },
+  { id: 'd_outputs', metric: 'Top 3 outputs completed', target: 'Yes/No/Partial' },
+  { id: 'd_physical', metric: 'Physical activity done', target: 'Yes/No' }
+];
+
+const WEEKLY_METRIC_TEMPLATE = [
+  { id: 'w_convos', metric: 'Customer conversations this week', target: '5 minimum' },
+  { id: 'w_hyp', metric: 'Hypotheses tested', target: '2 minimum' },
+  { id: 'w_kill', metric: 'Hypotheses killed', target: '1+ per 2 weeks' },
+  { id: 'w_active', metric: 'Ideas in active validation', target: '1-2' },
+  { id: 'w_expert', metric: 'Expert connections made', target: '3/week' },
+  { id: 'w_cases', metric: '1-page business cases written', target: '1/week' },
+  { id: 'w_field', metric: 'Field visits / ground work', target: '2/week' },
+  { id: 'w_hours', metric: 'Productive deep work hours total', target: '25+ hrs' }
+];
+
+const MONTHLY_SCORECARD_TEMPLATE = [
+  { id: 'm_interviews', metric: 'Total customer interviews completed', target: '40+' },
+  { id: 'm_markets_eval', metric: 'Markets seriously evaluated', target: '3' },
+  { id: 'm_markets_kill', metric: 'Markets killed with evidence', target: '2' },
+  { id: 'm_active_validation', metric: 'Active validation in progress', target: '1 strong idea' },
+  { id: 'm_pilot_customers', metric: 'Potential pilot customers identified', target: '5+' },
+  { id: 'm_loi', metric: 'LOI or pilot commitments', target: '2+' },
+  { id: 'm_burn', metric: 'Personal monthly burn tracked', target: 'Yes' },
+  { id: 'm_delegate', metric: 'Family business delegation built', target: 'Yes' }
+];
+
+const DECISION_MATRIX_TEMPLATE = [
+  { id: 'q1', quadrant: 'Q1', type: 'High Impact + Time Sensitive', protocol: 'Execute now before anything else.' },
+  { id: 'q2', quadrant: 'Q2', type: 'High Impact + Not Time Sensitive', protocol: 'Schedule protected deep work block in next 3 days.' },
+  { id: 'q3', quadrant: 'Q3', type: 'Low Impact + Time Sensitive', protocol: 'Delegate or batch.' },
+  { id: 'q4', quadrant: 'Q4', type: 'Low Impact + Not Time Sensitive', protocol: 'Eliminate.' }
+];
+
+const SECTOR_PRIORITIES = [
+  { id: 'biomass', sector: 'Biomass Energy', go: 'Pilot under ₹5L with operational pain.' },
+  { id: 'carbon', sector: 'Carbon Credits', go: '50+ farmer aggregation with MRV partner path.' },
+  { id: 'logistics', sector: 'B2B Logistics', go: 'Deep access to one lane or node.' },
+  { id: 'climate-b2b', sector: 'Climate Tech B2B', go: 'Anchor customer or anchor project exists.' },
+  { id: 'agri', sector: 'Agri Input/Output', go: 'Use family-business adjacency as distribution edge.' }
+];
+
+const THIRTY_DAY_PLAN = [
+  { id: 'day1', day: 1, week: 'Week 1', task: 'List 10 problems across biomass/carbon/agri.', output: '10 problem statements' },
+  { id: 'day2', day: 2, week: 'Week 1', task: 'Map ecosystem for top 2 sectors.', output: '2 ecosystem maps' },
+  { id: 'day3', day: 3, week: 'Week 1', task: 'Build 20-person interview list.', output: 'Outreach list complete' },
+  { id: 'day4', day: 4, week: 'Week 1', task: 'Send 20 cold outreach messages.', output: '20 outbound messages sent' },
+  { id: 'day5', day: 5, week: 'Week 1', task: 'Teardown 5 competitors.', output: 'Competitor teardown' },
+  { id: 'day6', day: 6, week: 'Week 1', task: 'Do first field visit.', output: '500+ word field notes' },
+  { id: 'day7', day: 7, week: 'Week 1', task: 'Rank top 3 hypotheses.', output: 'Hypothesis ranking' },
+  { id: 'day8', day: 8, week: 'Week 2', task: 'Run 2 customer interviews.', output: '2 interview notes' },
+  { id: 'day9', day: 9, week: 'Week 2', task: 'Run 2 more interviews and update confidence.', output: 'Hypothesis confidence update' },
+  { id: 'day10', day: 10, week: 'Week 2', task: 'Synthesize first interview batch.', output: '1-page synthesis' },
+  { id: 'day11', day: 11, week: 'Week 2', task: 'Run 2 interviews focused on willingness to pay.', output: 'Pricing signal notes' },
+  { id: 'day12', day: 12, week: 'Week 2', task: 'Map buyer journey.', output: 'Buyer journey map' },
+  { id: 'day13', day: 13, week: 'Week 2', task: 'Run 2 interviews and capture trust signals.', output: 'Trust signal list' },
+  { id: 'day14', day: 14, week: 'Week 2', task: 'Close week with 10 interviews total.', output: '10 interviews complete' },
+  { id: 'day15', day: 15, week: 'Week 3', task: 'Write 1-page problem-solution brief.', output: 'Brief complete' },
+  { id: 'day16', day: 16, week: 'Week 3', task: 'Share brief to 5 people and gather feedback.', output: '5 feedback entries' },
+  { id: 'day17', day: 17, week: 'Week 3', task: 'Revise solution and define simplest pilot.', output: 'Pilot concept' },
+  { id: 'day18', day: 18, week: 'Week 3', task: 'Build 1-page financial model.', output: 'Financial model' },
+  { id: 'day19', day: 19, week: 'Week 3', task: 'Identify 3 pilot customers + proposal.', output: 'Pilot proposal' },
+  { id: 'day20', day: 20, week: 'Week 3', task: 'Present proposal to 2 customers.', output: '2 pilot meetings' },
+  { id: 'day21', day: 21, week: 'Week 3', task: 'Review signal and learning.', output: 'Signal summary' },
+  { id: 'day22', day: 22, week: 'Week 4', task: 'Score top idea against validation funnel.', output: 'Validation scorecard' },
+  { id: 'day23', day: 23, week: 'Week 4', task: 'Get brutal advisor feedback.', output: 'Risks updated' },
+  { id: 'day24', day: 24, week: 'Week 4', task: 'Make GO/NO-GO decision.', output: 'Decision locked' },
+  { id: 'day25', day: 25, week: 'Week 4', task: 'Write internal investor memo.', output: '5-page memo' },
+  { id: 'day26', day: 26, week: 'Week 4', task: 'Set 90-day milestones.', output: 'Milestone map' },
+  { id: 'day27', day: 27, week: 'Week 4', task: 'Initiate 3 high-value connections.', output: '3 intros initiated' },
+  { id: 'day28', day: 28, week: 'Week 4', task: 'Document unfair advantages.', output: 'Moat analysis' },
+  { id: 'day29', day: 29, week: 'Week 4', task: 'Run 30-day retrospective.', output: '2-page review' },
+  { id: 'day30', day: 30, week: 'Week 4', task: 'Lock Month 2 goals.', output: 'Month 2 plan locked' }
+];
+
+const WEEKLY_FORCING_QUESTIONS = [
+  { id: 'fq1', question: 'What specific hypothesis did I test this week?' },
+  { id: 'fq2', question: 'What did customers tell me that surprised me?' },
+  { id: 'fq3', question: 'What did I kill this week?' },
+  { id: 'fq4', question: 'What is my single most important action for next week?' },
+  { id: 'fq5', question: 'What am I procrastinating on and why?' }
+];
+
+const MONTHLY_REVIEW_CHECKS = [
+  { id: 'mr1', text: 'Review metrics dashboard honestly.' },
+  { id: 'mr2', text: 'Kill dead hypotheses and promote strong ones.' },
+  { id: 'mr3', text: 'Refine daily schedule based on friction points.' },
+  { id: 'mr4', text: 'Increase family business delegation leverage.' },
+  { id: 'mr5', text: 'Identify highest-leverage activity for next month.' }
+];
 
 const ROADMAP_TEMPLATE = [
   {
@@ -326,6 +480,79 @@ function createDefaultPlaybooks() {
   }));
 }
 
+function createFounderManualState() {
+  return {
+    brutalTruths: BRUTAL_TRUTHS.map((text, index) => ({
+      id: `truth_${index + 1}`,
+      text,
+      acknowledged: false,
+      note: ''
+    })),
+    dailySchedule: DAILY_EXECUTION_SCHEDULE.map((item) => ({
+      id: item.id,
+      done: false,
+      note: ''
+    })),
+    weeklyModel: WEEKLY_OPERATING_MODEL.map((item) => ({
+      id: item.id,
+      done: false,
+      outputLog: ''
+    })),
+    validationFunnel: VALIDATION_FUNNEL.map((item) => ({
+      id: item.id,
+      passed: false,
+      killed: false,
+      notes: ''
+    })),
+    distractionAudit: DISTRACTION_AUDIT.map((item) => ({
+      id: item.id,
+      enabled: false,
+      notes: ''
+    })),
+    dailyMetrics: DAILY_METRIC_TEMPLATE.map((item) => ({
+      id: item.id,
+      actual: '',
+      status: ''
+    })),
+    weeklyMetrics: WEEKLY_METRIC_TEMPLATE.map((item) => ({
+      id: item.id,
+      actual: '',
+      status: ''
+    })),
+    monthlyScorecard: MONTHLY_SCORECARD_TEMPLATE.map((item) => ({
+      id: item.id,
+      actual: '',
+      status: ''
+    })),
+    sectorDecisions: SECTOR_PRIORITIES.map((item) => ({
+      id: item.id,
+      decision: '',
+      notes: ''
+    })),
+    thirtyDayPlan: THIRTY_DAY_PLAN.map((item) => ({
+      id: item.id,
+      done: false,
+      notes: ''
+    })),
+    forcingQuestions: WEEKLY_FORCING_QUESTIONS.map((item) => ({
+      id: item.id,
+      answer: ''
+    })),
+    monthlyReview: MONTHLY_REVIEW_CHECKS.map((item) => ({
+      id: item.id,
+      done: false,
+      notes: ''
+    })),
+    tenTenTen: {
+      day10: '',
+      month10: '',
+      year10: '',
+      hellYes: ''
+    },
+    updatedAt: nowISO()
+  };
+}
+
 function createDefaultData() {
   return {
     version: 1,
@@ -407,7 +634,8 @@ function createDefaultData() {
     weeklyRhythm: {
       logs: []
     },
-    reports: []
+    reports: [],
+    manual: createFounderManualState()
   };
 }
 
@@ -472,6 +700,10 @@ function normalizeRoadmap(months) {
 function normalizeData(rawData) {
   const defaults = createDefaultData();
   const raw = rawData && typeof rawData === 'object' ? rawData : {};
+  const alignById = (defaultsList, rawList) => {
+    const byId = new Map((Array.isArray(rawList) ? rawList : []).map((item) => [item.id, item]));
+    return defaultsList.map((base) => ({ ...base, ...(byId.get(base.id) || {}) }));
+  };
 
   const merged = {
     ...defaults,
@@ -672,7 +904,30 @@ function normalizeData(rawData) {
         generatedAt: report.generatedAt || nowISO(),
         snapshot: report.snapshot || {}
       }))
-      : defaults.reports
+      : defaults.reports,
+    manual: raw.manual && typeof raw.manual === 'object'
+      ? {
+        ...defaults.manual,
+        ...raw.manual,
+        brutalTruths: alignById(defaults.manual.brutalTruths, raw.manual.brutalTruths),
+        dailySchedule: alignById(defaults.manual.dailySchedule, raw.manual.dailySchedule),
+        weeklyModel: alignById(defaults.manual.weeklyModel, raw.manual.weeklyModel),
+        validationFunnel: alignById(defaults.manual.validationFunnel, raw.manual.validationFunnel),
+        distractionAudit: alignById(defaults.manual.distractionAudit, raw.manual.distractionAudit),
+        dailyMetrics: alignById(defaults.manual.dailyMetrics, raw.manual.dailyMetrics),
+        weeklyMetrics: alignById(defaults.manual.weeklyMetrics, raw.manual.weeklyMetrics),
+        monthlyScorecard: alignById(defaults.manual.monthlyScorecard, raw.manual.monthlyScorecard),
+        sectorDecisions: alignById(defaults.manual.sectorDecisions, raw.manual.sectorDecisions),
+        thirtyDayPlan: alignById(defaults.manual.thirtyDayPlan, raw.manual.thirtyDayPlan),
+        forcingQuestions: alignById(defaults.manual.forcingQuestions, raw.manual.forcingQuestions),
+        monthlyReview: alignById(defaults.manual.monthlyReview, raw.manual.monthlyReview),
+        tenTenTen: {
+          ...defaults.manual.tenTenTen,
+          ...(raw.manual.tenTenTen || {})
+        },
+        updatedAt: raw.manual.updatedAt || nowISO()
+      }
+      : defaults.manual
   };
 
   merged.metricsSnapshots.sort((a, b) => a.date.localeCompare(b.date));
@@ -3046,6 +3301,476 @@ function WeeklyRhythmView({ data, updateData, onGenerateSummary }) {
   );
 }
 
+function FounderManualView({ data, updateData }) {
+  const [tab, setTab] = useState('truths');
+  const manual = data.manual || createFounderManualState();
+
+  const completion = useMemo(() => {
+    const truthsDone = manual.brutalTruths.filter((item) => item.acknowledged).length;
+    const scheduleDone = manual.dailySchedule.filter((item) => item.done).length;
+    const sprintDone = manual.thirtyDayPlan.filter((item) => item.done).length;
+    const total = manual.brutalTruths.length + manual.dailySchedule.length + manual.thirtyDayPlan.length;
+    const done = truthsDone + scheduleDone + sprintDone;
+    return total ? Math.round((done / total) * 100) : 0;
+  }, [manual]);
+
+  function updateManualItem(listKey, id, field, value) {
+    updateData((draft) => {
+      const list = draft.manual?.[listKey];
+      if (!Array.isArray(list)) return;
+      const target = list.find((item) => item.id === id);
+      if (!target) return;
+      target[field] = value;
+      draft.manual.updatedAt = nowISO();
+    });
+  }
+
+  function updateTenTenTen(field, value) {
+    updateData((draft) => {
+      draft.manual.tenTenTen[field] = value;
+      draft.manual.updatedAt = nowISO();
+    });
+  }
+
+  return (
+    <div className="space-y-4 animate-slideFade">
+      <section className="card-panel p-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h3 className="font-heading text-lg font-semibold">Founder OS Operating Manual (v1)</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Built from your uploaded Founder_OS document. Execute daily, validate weekly, review monthly.</p>
+          </div>
+          <div className="text-sm text-slate-600 dark:text-slate-300">Manual completion: {completion}%</div>
+        </div>
+        <div className="mt-3"><ProgressBar progress={completion} /></div>
+      </section>
+
+      <section className="card-panel p-4">
+        <div className="flex gap-2 flex-wrap">
+          {[
+            ['truths', 'Brutal Truths'],
+            ['schedule', 'Daily Schedule'],
+            ['weekly', 'Weekly Model'],
+            ['validation', 'Validation Funnel'],
+            ['distractions', 'Distraction System'],
+            ['kpis', 'KPI Templates'],
+            ['decisions', 'Decision Framework'],
+            ['sprint', '30-Day Plan'],
+            ['maintenance', 'Maintenance']
+          ].map(([key, label]) => (
+            <button
+              key={key}
+              className={`px-3 py-1.5 rounded-lg text-sm ${tab === key ? 'bg-brand-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'}`}
+              onClick={() => setTab(key)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {tab === 'truths' ? (
+        <section className="card-panel p-4 space-y-3">
+          <h4 className="font-heading text-lg font-semibold">01. Brutal Truths First</h4>
+          {manual.brutalTruths.map((item, index) => (
+            <article key={item.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-sm font-medium">TRUTH {index + 1}: {item.text}</p>
+                <label className="inline-flex items-center gap-2 text-xs">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(item.acknowledged)}
+                    onChange={(event) => updateManualItem('brutalTruths', item.id, 'acknowledged', event.target.checked)}
+                  />
+                  Acknowledged
+                </label>
+              </div>
+              <textarea
+                className="input-field mt-2 min-h-20"
+                placeholder="Personal note: where this truth is currently showing up"
+                value={item.note || ''}
+                onChange={(event) => updateManualItem('brutalTruths', item.id, 'note', event.target.value)}
+              />
+            </article>
+          ))}
+        </section>
+      ) : null}
+
+      {tab === 'schedule' ? (
+        <section className="card-panel p-4 space-y-3">
+          <h4 className="font-heading text-lg font-semibold">02. Daily Execution Schedule</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left border-b border-slate-200 dark:border-slate-700">
+                  <th className="py-2 pr-3">Time</th>
+                  <th className="py-2 pr-3">Block</th>
+                  <th className="py-2 pr-3">Action</th>
+                  <th className="py-2 pr-3">Required Output</th>
+                  <th className="py-2 pr-3">Done</th>
+                </tr>
+              </thead>
+              <tbody>
+                {DAILY_EXECUTION_SCHEDULE.map((row) => {
+                  const log = manual.dailySchedule.find((item) => item.id === row.id) || {};
+                  return (
+                    <tr key={row.id} className="border-b border-slate-100 dark:border-slate-800">
+                      <td className="py-2 pr-3 whitespace-nowrap">{row.time}</td>
+                      <td className="py-2 pr-3 font-medium">{row.block}</td>
+                      <td className="py-2 pr-3">{row.action}</td>
+                      <td className="py-2 pr-3">{row.output}</td>
+                      <td className="py-2 pr-3">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(log.done)}
+                          onChange={(event) => updateManualItem('dailySchedule', row.id, 'done', event.target.checked)}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Audio/Drive Protocol: Every audio session must produce one output note. Never consume without output.
+          </p>
+        </section>
+      ) : null}
+
+      {tab === 'weekly' ? (
+        <section className="card-panel p-4 space-y-3">
+          <h4 className="font-heading text-lg font-semibold">03. Weekly Operating Model</h4>
+          <div className="space-y-2">
+            {WEEKLY_OPERATING_MODEL.map((row) => {
+              const log = manual.weeklyModel.find((item) => item.id === row.id) || {};
+              return (
+                <article key={row.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium">{row.day}: {row.theme}</p>
+                    <label className="inline-flex items-center gap-2 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(log.done)}
+                        onChange={(event) => updateManualItem('weeklyModel', row.id, 'done', event.target.checked)}
+                      />
+                      Complete
+                    </label>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{row.focus}</p>
+                  <p className="text-xs text-slate-500 mt-1">Required: {row.output}</p>
+                  <textarea
+                    className="input-field mt-2 min-h-20"
+                    placeholder="Output log"
+                    value={log.outputLog || ''}
+                    onChange={(event) => updateManualItem('weeklyModel', row.id, 'outputLog', event.target.value)}
+                  />
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {tab === 'validation' ? (
+        <section className="card-panel p-4 space-y-3">
+          <h4 className="font-heading text-lg font-semibold">04. Idea Validation Funnel</h4>
+          <div className="space-y-2">
+            {VALIDATION_FUNNEL.map((row) => {
+              const log = manual.validationFunnel.find((item) => item.id === row.id) || {};
+              return (
+                <article key={row.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium">{row.stage} <span className="text-xs text-slate-500">({row.timeBox})</span></p>
+                    <div className="flex items-center gap-4 text-xs">
+                      <label className="inline-flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(log.passed)}
+                          onChange={(event) => updateManualItem('validationFunnel', row.id, 'passed', event.target.checked)}
+                        />
+                        Pass
+                      </label>
+                      <label className="inline-flex items-center gap-1">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(log.killed)}
+                          onChange={(event) => updateManualItem('validationFunnel', row.id, 'killed', event.target.checked)}
+                        />
+                        Kill
+                      </label>
+                    </div>
+                  </div>
+                  <p className="text-sm mt-1">{row.action}</p>
+                  <p className="text-xs text-emerald-600 mt-1">Pass criteria: {row.pass}</p>
+                  <p className="text-xs text-rose-600 mt-1">Kill criteria: {row.kill}</p>
+                  <textarea
+                    className="input-field mt-2 min-h-20"
+                    placeholder="Evidence notes"
+                    value={log.notes || ''}
+                    onChange={(event) => updateManualItem('validationFunnel', row.id, 'notes', event.target.value)}
+                  />
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {tab === 'distractions' ? (
+        <section className="card-panel p-4 space-y-3">
+          <h4 className="font-heading text-lg font-semibold">05. Distraction Elimination System</h4>
+          <div className="space-y-2">
+            {DISTRACTION_AUDIT.map((row) => {
+              const log = manual.distractionAudit.find((item) => item.id === row.id) || {};
+              return (
+                <article key={row.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="font-medium">{row.type}</p>
+                    <label className="inline-flex items-center gap-2 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(log.enabled)}
+                        onChange={(event) => updateManualItem('distractionAudit', row.id, 'enabled', event.target.checked)}
+                      />
+                      Protocol Active
+                    </label>
+                  </div>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{row.protocol}</p>
+                  <textarea
+                    className="input-field mt-2 min-h-20"
+                    placeholder="Notes on slips and fixes"
+                    value={log.notes || ''}
+                    onChange={(event) => updateManualItem('distractionAudit', row.id, 'notes', event.target.value)}
+                  />
+                </article>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {tab === 'kpis' ? (
+        <section className="card-panel p-4 space-y-4">
+          <h4 className="font-heading text-lg font-semibold">06. KPI Templates</h4>
+          <div className="space-y-4">
+            {[
+              ['Daily KPIs', DAILY_METRIC_TEMPLATE, manual.dailyMetrics, 'dailyMetrics'],
+              ['Weekly KPIs', WEEKLY_METRIC_TEMPLATE, manual.weeklyMetrics, 'weeklyMetrics'],
+              ['Monthly Scorecard', MONTHLY_SCORECARD_TEMPLATE, manual.monthlyScorecard, 'monthlyScorecard']
+            ].map(([title, template, values, key]) => (
+              <article key={title} className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                <h5 className="font-medium mb-2">{title}</h5>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="text-left border-b border-slate-200 dark:border-slate-700">
+                        <th className="py-2 pr-3">Metric</th>
+                        <th className="py-2 pr-3">Target</th>
+                        <th className="py-2 pr-3">Actual</th>
+                        <th className="py-2 pr-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {template.map((row) => {
+                        const log = (values || []).find((item) => item.id === row.id) || {};
+                        return (
+                          <tr key={row.id} className="border-b border-slate-100 dark:border-slate-800">
+                            <td className="py-2 pr-3">{row.metric}</td>
+                            <td className="py-2 pr-3">{row.target}</td>
+                            <td className="py-2 pr-3">
+                              <input
+                                className="input-field"
+                                value={log.actual || ''}
+                                onChange={(event) => updateManualItem(key, row.id, 'actual', event.target.value)}
+                              />
+                            </td>
+                            <td className="py-2 pr-3">
+                              <input
+                                className="input-field"
+                                value={log.status || ''}
+                                onChange={(event) => updateManualItem(key, row.id, 'status', event.target.value)}
+                                placeholder="On Track / Risk / Behind"
+                              />
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {tab === 'decisions' ? (
+        <section className="card-panel p-4 space-y-4">
+          <h4 className="font-heading text-lg font-semibold">07. Decision-Making Framework</h4>
+          <article className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+            <h5 className="font-medium mb-2">Founder Decision Matrix</h5>
+            <div className="grid gap-2 md:grid-cols-2">
+              {DECISION_MATRIX_TEMPLATE.map((row) => (
+                <div key={row.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">{row.quadrant}</p>
+                  <p className="font-medium text-sm">{row.type}</p>
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mt-1">{row.protocol}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+
+          <article className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+            <h5 className="font-medium mb-2">10-10-10 Rule + Hell Yes/No</h5>
+            <div className="grid gap-2 md:grid-cols-2">
+              <label className="text-sm">In 10 days, regret?
+                <input className="input-field mt-1" value={manual.tenTenTen.day10 || ''} onChange={(event) => updateTenTenTen('day10', event.target.value)} />
+              </label>
+              <label className="text-sm">In 10 months, still matters?
+                <input className="input-field mt-1" value={manual.tenTenTen.month10 || ''} onChange={(event) => updateTenTenTen('month10', event.target.value)} />
+              </label>
+              <label className="text-sm">In 10 years, worth building?
+                <input className="input-field mt-1" value={manual.tenTenTen.year10 || ''} onChange={(event) => updateTenTenTen('year10', event.target.value)} />
+              </label>
+              <label className="text-sm">Hell Yes or No?
+                <input className="input-field mt-1" value={manual.tenTenTen.hellYes || ''} onChange={(event) => updateTenTenTen('hellYes', event.target.value)} />
+              </label>
+            </div>
+          </article>
+
+          <article className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+            <h5 className="font-medium mb-2">Sector Prioritization</h5>
+            <div className="space-y-2">
+              {SECTOR_PRIORITIES.map((row) => {
+                const log = manual.sectorDecisions.find((item) => item.id === row.id) || {};
+                return (
+                  <div key={row.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+                    <p className="font-medium text-sm">{row.sector}</p>
+                    <p className="text-xs text-slate-500 mt-1">GO criteria: {row.go}</p>
+                    <div className="grid gap-2 md:grid-cols-2 mt-2">
+                      <input
+                        className="input-field"
+                        placeholder="Decision (GO / NO-GO / WATCH)"
+                        value={log.decision || ''}
+                        onChange={(event) => updateManualItem('sectorDecisions', row.id, 'decision', event.target.value)}
+                      />
+                      <input
+                        className="input-field"
+                        placeholder="Notes"
+                        value={log.notes || ''}
+                        onChange={(event) => updateManualItem('sectorDecisions', row.id, 'notes', event.target.value)}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+        </section>
+      ) : null}
+
+      {tab === 'sprint' ? (
+        <section className="card-panel p-4 space-y-3">
+          <h4 className="font-heading text-lg font-semibold">08. 30-Day Execution Plan</h4>
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead>
+                <tr className="text-left border-b border-slate-200 dark:border-slate-700">
+                  <th className="py-2 pr-3">Day</th>
+                  <th className="py-2 pr-3">Week</th>
+                  <th className="py-2 pr-3">Task</th>
+                  <th className="py-2 pr-3">Output Required</th>
+                  <th className="py-2 pr-3">Done</th>
+                  <th className="py-2 pr-3">Notes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {THIRTY_DAY_PLAN.map((row) => {
+                  const log = manual.thirtyDayPlan.find((item) => item.id === row.id) || {};
+                  return (
+                    <tr key={row.id} className="border-b border-slate-100 dark:border-slate-800 align-top">
+                      <td className="py-2 pr-3">{row.day}</td>
+                      <td className="py-2 pr-3 whitespace-nowrap">{row.week}</td>
+                      <td className="py-2 pr-3">{row.task}</td>
+                      <td className="py-2 pr-3">{row.output}</td>
+                      <td className="py-2 pr-3">
+                        <input
+                          type="checkbox"
+                          checked={Boolean(log.done)}
+                          onChange={(event) => updateManualItem('thirtyDayPlan', row.id, 'done', event.target.checked)}
+                        />
+                      </td>
+                      <td className="py-2 pr-3 min-w-[240px]">
+                        <input
+                          className="input-field"
+                          value={log.notes || ''}
+                          onChange={(event) => updateManualItem('thirtyDayPlan', row.id, 'notes', event.target.value)}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : null}
+
+      {tab === 'maintenance' ? (
+        <section className="card-panel p-4 space-y-4">
+          <h4 className="font-heading text-lg font-semibold">09-10. Prioritization + System Maintenance</h4>
+          <article className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+            <h5 className="font-medium mb-2">Weekly Forcing Questions</h5>
+            <div className="space-y-2">
+              {WEEKLY_FORCING_QUESTIONS.map((row) => {
+                const log = manual.forcingQuestions.find((item) => item.id === row.id) || {};
+                return (
+                  <label key={row.id} className="block text-sm">
+                    {row.question}
+                    <textarea
+                      className="input-field mt-1 min-h-20"
+                      value={log.answer || ''}
+                      onChange={(event) => updateManualItem('forcingQuestions', row.id, 'answer', event.target.value)}
+                    />
+                  </label>
+                );
+              })}
+            </div>
+          </article>
+
+          <article className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+            <h5 className="font-medium mb-2">Monthly System Review Checklist</h5>
+            <div className="space-y-2">
+              {MONTHLY_REVIEW_CHECKS.map((row) => {
+                const log = manual.monthlyReview.find((item) => item.id === row.id) || {};
+                return (
+                  <div key={row.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-2">
+                    <label className="inline-flex items-center gap-2 text-sm font-medium">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(log.done)}
+                        onChange={(event) => updateManualItem('monthlyReview', row.id, 'done', event.target.checked)}
+                      />
+                      {row.text}
+                    </label>
+                    <input
+                      className="input-field mt-2"
+                      placeholder="Notes"
+                      value={log.notes || ''}
+                      onChange={(event) => updateManualItem('monthlyReview', row.id, 'notes', event.target.value)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </article>
+        </section>
+      ) : null}
+    </div>
+  );
+}
+
 function App() {
   const [data, setData] = useState(() => normalizeData(loadFromStorage()));
   const [activeView, setActiveView] = useState('dashboard');
@@ -3303,6 +4028,8 @@ function App() {
           </header>
 
           <div className="px-4 md:px-6 py-5 space-y-6">
+            {activeView === 'manual' ? <FounderManualView data={data} updateData={updateData} /> : null}
+
             {activeView === 'dashboard' ? (
               <DashboardView
                 data={data}
