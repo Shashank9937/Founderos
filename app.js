@@ -4,6 +4,7 @@ const STORAGE_KEY = 'founder_os_v1';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
+  { id: 'logbook', label: 'Logbook', icon: '📝' },
   { id: 'manual', label: 'Founder Manual', icon: '📘' },
   { id: 'execution', label: 'Execution Tracker', icon: '🧭' },
   { id: 'learning', label: 'Learning Tracker', icon: '📚' },
@@ -635,6 +636,7 @@ function createDefaultData() {
       logs: []
     },
     reports: [],
+    logbook: [],
     manual: createFounderManualState()
   };
 }
@@ -905,6 +907,20 @@ function normalizeData(rawData) {
         snapshot: report.snapshot || {}
       }))
       : defaults.reports,
+    logbook: Array.isArray(raw.logbook)
+      ? raw.logbook.map((entry) => ({
+        id: entry.id || uid('log'),
+        date: entry.date || toDateISO(),
+        category: entry.category || 'General',
+        title: entry.title || '',
+        content: entry.content || '',
+        tags: Array.isArray(entry.tags)
+          ? entry.tags.map((tag) => String(tag).trim()).filter(Boolean)
+          : String(entry.tags || '').split(',').map((tag) => tag.trim()).filter(Boolean),
+        createdAt: entry.createdAt || nowISO(),
+        updatedAt: entry.updatedAt || nowISO()
+      }))
+      : defaults.logbook,
     manual: raw.manual && typeof raw.manual === 'object'
       ? {
         ...defaults.manual,
@@ -937,6 +953,11 @@ function normalizeData(rawData) {
   merged.learning.learningHours.sort((a, b) => b.weekStart.localeCompare(a.weekStart));
   merged.knowledge.weeklyReviews.sort((a, b) => b.weekStart.localeCompare(a.weekStart));
   merged.reports.sort((a, b) => b.generatedAt.localeCompare(a.generatedAt));
+  merged.logbook.sort((a, b) => {
+    const aKey = `${a.date} ${a.updatedAt || a.createdAt || ''}`;
+    const bKey = `${b.date} ${b.updatedAt || b.createdAt || ''}`;
+    return bKey.localeCompare(aKey);
+  });
 
   return merged;
 }
@@ -3301,6 +3322,214 @@ function WeeklyRhythmView({ data, updateData, onGenerateSummary }) {
   );
 }
 
+function LogbookView({ data, updateData }) {
+  const entries = data.logbook || [];
+  const [search, setSearch] = useState('');
+  const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState({
+    date: toDateISO(),
+    category: 'General',
+    title: '',
+    tags: '',
+    content: ''
+  });
+
+  const filtered = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    if (!query) return entries;
+    return entries.filter((entry) => {
+      const haystack = [
+        entry.date,
+        entry.category,
+        entry.title,
+        entry.content,
+        (entry.tags || []).join(' ')
+      ].join(' ').toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [entries, search]);
+
+  function parseTags(value) {
+    return String(value || '')
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+  }
+
+  function updateForm(field, value) {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  }
+
+  function clearForm() {
+    setEditingId(null);
+    setForm({
+      date: toDateISO(),
+      category: 'General',
+      title: '',
+      tags: '',
+      content: ''
+    });
+  }
+
+  function saveEntry(event) {
+    event.preventDefault();
+    const title = form.title.trim();
+    const content = form.content.trim();
+    if (!title || !content) return;
+
+    if (editingId) {
+      updateData((draft) => {
+        const list = Array.isArray(draft.logbook) ? draft.logbook : [];
+        const target = list.find((item) => item.id === editingId);
+        if (!target) return;
+        target.date = form.date || toDateISO();
+        target.category = form.category || 'General';
+        target.title = title;
+        target.content = content;
+        target.tags = parseTags(form.tags);
+        target.updatedAt = nowISO();
+      });
+      clearForm();
+      return;
+    }
+
+    updateData((draft) => {
+      if (!Array.isArray(draft.logbook)) draft.logbook = [];
+      draft.logbook.unshift({
+        id: uid('log'),
+        date: form.date || toDateISO(),
+        category: form.category || 'General',
+        title,
+        content,
+        tags: parseTags(form.tags),
+        createdAt: nowISO(),
+        updatedAt: nowISO()
+      });
+    });
+    clearForm();
+  }
+
+  function editEntry(entry) {
+    setEditingId(entry.id);
+    setForm({
+      date: entry.date || toDateISO(),
+      category: entry.category || 'General',
+      title: entry.title || '',
+      tags: Array.isArray(entry.tags) ? entry.tags.join(', ') : '',
+      content: entry.content || ''
+    });
+  }
+
+  function deleteEntry(id) {
+    if (!window.confirm('Delete this log entry?')) return;
+    updateData((draft) => {
+      const list = Array.isArray(draft.logbook) ? draft.logbook : [];
+      draft.logbook = list.filter((item) => item.id !== id);
+    });
+    if (editingId === id) clearForm();
+  }
+
+  return (
+    <div className="space-y-4 animate-slideFade">
+      <section className="card-panel p-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h3 className="font-heading text-lg font-semibold">Universal Founder Logbook</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Capture everything here so your system replaces Notion.</p>
+          </div>
+          <span className="metric-pill">{entries.length} total entries</span>
+        </div>
+      </section>
+
+      <section className="card-panel p-4">
+        <h4 className="font-heading text-lg font-semibold mb-3">{editingId ? 'Edit Log Entry' : 'Add Log Entry'}</h4>
+        <form className="space-y-3" onSubmit={saveEntry}>
+          <div className="grid gap-3 md:grid-cols-2">
+            <label className="text-sm">Date
+              <input
+                type="date"
+                className="input-field mt-1"
+                value={form.date}
+                onChange={(event) => updateForm('date', event.target.value)}
+              />
+            </label>
+            <label className="text-sm">Category
+              <input
+                className="input-field mt-1"
+                placeholder="General / Sales / Product / Learning"
+                value={form.category}
+                onChange={(event) => updateForm('category', event.target.value)}
+              />
+            </label>
+          </div>
+          <label className="text-sm block">Title
+            <input
+              className="input-field mt-1"
+              placeholder="Short title"
+              value={form.title}
+              onChange={(event) => updateForm('title', event.target.value)}
+            />
+          </label>
+          <label className="text-sm block">Tags (comma separated)
+            <input
+              className="input-field mt-1"
+              placeholder="founder, interview, mrr"
+              value={form.tags}
+              onChange={(event) => updateForm('tags', event.target.value)}
+            />
+          </label>
+          <label className="text-sm block">Details
+            <textarea
+              className="input-field mt-1 min-h-32"
+              placeholder="Write your full notes, decisions, learnings, ideas, and follow-ups..."
+              value={form.content}
+              onChange={(event) => updateForm('content', event.target.value)}
+            />
+          </label>
+          <div className="flex gap-2">
+            <button className="btn-primary" type="submit">{editingId ? 'Update Entry' : 'Save Entry'}</button>
+            <button className="btn-secondary" type="button" onClick={clearForm}>Clear</button>
+          </div>
+        </form>
+      </section>
+
+      <section className="card-panel p-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+          <h4 className="font-heading text-lg font-semibold">Entry Archive</h4>
+          <input
+            className="input-field max-w-md"
+            placeholder="Search by title, tags, content, date..."
+            value={search}
+            onChange={(event) => setSearch(event.target.value)}
+          />
+        </div>
+        <div className="space-y-2">
+          {filtered.length ? filtered.map((entry) => (
+            <article key={entry.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <p className="text-xs text-slate-500">{entry.date} • {entry.category}</p>
+                  <h5 className="font-medium">{entry.title}</h5>
+                </div>
+                <div className="flex gap-2">
+                  <button className="btn-secondary" onClick={() => editEntry(entry)}>Edit</button>
+                  <button className="btn-danger" onClick={() => deleteEntry(entry.id)}>Delete</button>
+                </div>
+              </div>
+              {Array.isArray(entry.tags) && entry.tags.length ? (
+                <p className="text-xs text-slate-500 mt-1">Tags: {entry.tags.join(', ')}</p>
+              ) : null}
+              <p className="text-sm whitespace-pre-wrap mt-2">{entry.content}</p>
+            </article>
+          )) : (
+            <p className="text-sm text-slate-500">No entries found.</p>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function FounderManualView({ data, updateData }) {
   const [tab, setTab] = useState('truths');
   const manual = data.manual || createFounderManualState();
@@ -4028,6 +4257,8 @@ function App() {
           </header>
 
           <div className="px-4 md:px-6 py-5 space-y-6">
+            {activeView === 'logbook' ? <LogbookView data={data} updateData={updateData} /> : null}
+
             {activeView === 'manual' ? <FounderManualView data={data} updateData={updateData} /> : null}
 
             {activeView === 'dashboard' ? (
