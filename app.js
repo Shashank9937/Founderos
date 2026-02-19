@@ -5,6 +5,7 @@ const STORAGE_KEY = 'founder_os_v1';
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
   { id: 'logbook', label: 'Logbook', icon: '📝' },
+  { id: 'documents', label: 'Doc Sections', icon: '🗃' },
   { id: 'manual', label: 'Founder Manual', icon: '📘' },
   { id: 'execution', label: 'Execution Tracker', icon: '🧭' },
   { id: 'learning', label: 'Learning Tracker', icon: '📚' },
@@ -178,6 +179,320 @@ const MONTHLY_REVIEW_CHECKS = [
   { id: 'mr3', text: 'Refine daily schedule based on friction points.' },
   { id: 'mr4', text: 'Increase family business delegation leverage.' },
   { id: 'mr5', text: 'Identify highest-leverage activity for next month.' }
+];
+
+const DOCUMENT_LIBRARY_TEMPLATE = [
+  {
+    id: 'doc_founder_operating_system',
+    title: 'Founder Operating System',
+    sourceFile: 'Founder_Operating_System.docx',
+    sections: [
+      {
+        id: 'fos_01',
+        title: '01 Daily Execution Blueprint',
+        content: `Every hour is pre-decided and output-first.
+
+Core schedule blocks:
+- 05:00 wake and reset, no phone.
+- 06:00 Deep Work Block 1 (highest-priority startup output).
+- 08:15 to 14:00 family business operations with delegation.
+- 12:30 Deep Work Block 2 (validation calls, scoring, follow-up).
+- 17:00 review KPIs and lock tomorrow's 3 outputs.
+- 21:00 shutdown protocol and sleep protection.
+
+Rules:
+- One task per deep work block.
+- If interrupted, log and eliminate the source within 48 hours.
+- Instrumental music only; no context switching.
+- Night shutdown always includes KPI logging and next-day planning.`
+      },
+      {
+        id: 'fos_02',
+        title: '02 30-Day Idea to Validation War Plan',
+        content: `Goal: find one painful problem buyers will pay for before building.
+
+Week 1: problem extraction
+- Document 50 problems and shortlist top 5.
+
+Week 2: demand stress test
+- Write problem briefs, publish a landing page, send outreach, run calls.
+
+Week 3: first revenue signal
+- Offer manual pilot, deliver, and ask for payment or LOI.
+
+Week 4: kill or accelerate
+- Seek disconfirming evidence, model economics, and make binary decision.
+
+Continue threshold:
+- 25+ conversations by Day 30.
+- 5+ explicit willingness-to-pay confirmations.
+- 1+ LOI or payment attempt by Day 28.`
+      },
+      {
+        id: 'fos_03',
+        title: '03 Idea Generation Framework',
+        content: `Mine problems systematically from:
+- Operator interviews.
+- Government and compliance reports.
+- Job postings.
+- Failed startups.
+- LinkedIn operator complaints.
+- Family business workflows.
+- Trade conference questions.
+
+Score each idea on:
+- Market size.
+- Severity and frequency.
+- Willingness to pay.
+- Defensibility.
+- Speed to revenue.
+- Founder edge.
+
+Scoring rule:
+- <65 kill.
+- 65 to 79 validate further.
+- 80+ pursue aggressively.`
+      },
+      {
+        id: 'fos_04',
+        title: '04 Distraction Elimination Protocol',
+        content: `Cognitive drift control:
+- Write 3 daily outputs on physical sticky note each morning.
+- Read sticky note before touching keyboard.
+- Start each deep work block with a written deliverable promise.
+
+Task-switching prevention:
+- One browser window and one tab during deep work.
+- Capture new tasks on paper, do not execute mid-block.
+- Re-enter primary task within 30 seconds.
+
+2-minute decision rule:
+- If reversible and under threshold risk, decide immediately.
+- If irreversible, cap deliberation at 30 minutes then decide.`
+      },
+      {
+        id: 'fos_05',
+        title: '05 Passive Time Optimization',
+        content: `Use passive time as leverage, not extra stress.
+
+Protocols:
+- Driving: domain podcasts/audiobooks + 90-second applied note.
+- Walking: no audio input, only synthesis and voice capture.
+- Waiting: collect observed problems in physical note cards.
+- Long travel: one long-form report/book, not random articles.
+
+Rule:
+- Passive time is input/synthesis only.
+- Do not make major decisions during passive blocks.`
+      },
+      {
+        id: 'fos_06',
+        title: '06 Weekly Metrics Dashboard',
+        content: `Daily/weekly KPI tracker includes:
+- Problems documented.
+- Industry conversations.
+- Ideas scored.
+- Outreach and follow-ups.
+- Revenue asks.
+- Skill blocks completed.
+- Fake productivity incidents.
+
+Sunday review:
+- Hit-rate vs target.
+- Root-cause for weakest KPI.
+- Largest concrete output.
+- Next week's single highest-leverage action.`
+      },
+      {
+        id: 'fos_07',
+        title: '07 Decision Framework',
+        content: `Kill an idea if:
+- Problem is nice-to-have after 20+ conversations.
+- No LOI or payment by Day 28.
+- Buyer has inaccessible approval chain.
+- Time-to-revenue exceeds practical runway.
+
+Double down if:
+- 2+ paid/LOI signals.
+- Organic referrals appear.
+- Weekly recurring pain is reduced for pilot users.
+- Path to 50 clients in 90 days is visible.
+
+Pivot rule:
+- Pivot on evidence only, never intuition.
+- Complete 10 fresh conversations before formal pivot.`
+      },
+      {
+        id: 'fos_08',
+        title: '08 Brutal Truth',
+        content: `Primary failure modes:
+- Context fragmentation across family business and startup.
+- Validation theater without money signals.
+- Premature complexity before first paying client.
+- Multi-sector drift instead of one 30-day focus.
+- Consumption addiction over execution.
+
+Success is driven by:
+- Iteration speed.
+- Conversation volume.
+- System adherence under pressure.
+- Fast kill decisions.
+- Access to the right operators and decision rooms.`
+      }
+    ]
+  },
+  {
+    id: 'doc_zero_to_founder_war_mode',
+    title: 'Zero-To-Founder War Mode',
+    sourceFile: 'Zero_To_Founder_War_Mode.docx',
+    sections: [
+      {
+        id: 'ztf_01',
+        title: '01 Founder Core Mastery Roadmap',
+        content: `Learning is ranked, sequenced, and applied immediately.
+
+Priority capability stack:
+- CEO decision quality (first principles, asymmetry, second-order effects).
+- Supply chain systems and margin nodes.
+- Unit economics and cash conversion discipline.
+- B2B sales and negotiation.
+- Buyer psychology and status-quo break mechanisms.
+- Operations SOP design and capital allocation.
+- Moat development from data, workflow, and regulation.
+
+Application rule:
+- Same-day execution for every learned concept.`
+      },
+      {
+        id: 'ztf_02',
+        title: '02 30-Day Company Launch War Plan',
+        content: `Definition of launch:
+- Validated painful problem.
+- Revenue attempt (payment/LOI/pilot commitment).
+- Legal entity filing.
+- 90-day forward plan.
+
+Phase 1 (Days 1 to 10):
+- Sector selection, conversations, scored problem shortlist.
+
+Phase 2 (Days 11 to 20):
+- Pilot offer, LOI asks, manual delivery, revenue asks.
+
+Phase 3 (Days 21 to 30):
+- SOP, repeatability, unit economics, registration, second client attempt.`
+      },
+      {
+        id: 'ztf_03',
+        title: '03 Daily Time Structure',
+        content: `Non-negotiable schedule for split-focus founders:
+- 05:00 wake protocol.
+- 06:00 deep work block 1.
+- 08:15 to 14:00 family business block.
+- 12:30 deep work block 2.
+- 15:00 outreach block.
+- 17:00 dashboard review.
+- 21:00 shutdown ritual.
+
+Family business leverage:
+- Use network access for first customer conversations.
+- Use cash-flow buffer to avoid premature fundraising.
+- Convert operational proximity into proprietary insights.`
+      },
+      {
+        id: 'ztf_04',
+        title: '04 AI Agent Leverage System',
+        content: `AI replaces first hires at zero capital.
+
+Core agents:
+- Market research analyst.
+- Lead research and outreach personalization.
+- Sales messaging and follow-up sequence engine.
+- Financial modeling assistant.
+- SOP/documentation generator.
+- Competitor intelligence monitor.
+
+AI usage rule:
+- Every session must produce an output actionable today.
+- If output is only "interesting," stop and redefine objective.`
+      },
+      {
+        id: 'ztf_05',
+        title: '05 Idea Generation Framework From Zero',
+        content: `Problem mining sources:
+- Family business manual workflows.
+- Operator complaints.
+- Sector/government reports.
+- Job posting patterns.
+- Failure postmortems.
+- Commodity volatility.
+- Regulatory gaps.
+
+Scoring:
+- Urgency, frequency, budget access, market size, founder access, speed to revenue, defensibility, scalability.
+- Minimum score to proceed: 70.
+
+Model preference:
+- Start with high-margin, low-volume B2B service-enabled models.`
+      },
+      {
+        id: 'ztf_06',
+        title: '06 Validation System Full Toolkit',
+        content: `Validation toolkit includes:
+- Cold outreach scripts (problem-led and referral-led).
+- 25-minute discovery call structure.
+- Objection handling playbook.
+- Pilot offer template with urgency and ROI framing.
+- Three-round pricing experiment model.
+
+Hard kill triggers:
+- Weak unprompted pain confirmation.
+- Zero paid intent after multiple offers.
+- No buyer budget authority access.
+- Delivery model impossible to scale from manual pilot.`
+      },
+      {
+        id: 'ztf_07',
+        title: '07 Execution Metrics Dashboard',
+        content: `Track daily and weekly:
+- Problems documented.
+- Operator conversations.
+- Ideas scored.
+- Cold outreach and follow-up counts.
+- Revenue asks and pilot offers.
+- AI workflows executed.
+- Skill blocks completed.
+- Fake productivity incidents.
+- Validation signals.
+
+Run Sunday review and milestone audit:
+- Compare to 30-day target timeline.
+- Diagnose structural failures before next week starts.`
+      },
+      {
+        id: 'ztf_08',
+        title: '08 Brutal Founder Reality',
+        content: `Likely blind spots:
+- Busyness without founder outputs.
+- Sector paralysis from too many options.
+- Family business consuming startup deep work.
+- Over-planning in place of external action.
+- Conservatism as disguised avoidance.
+
+Operator behavior:
+- One active idea.
+- Frequent revenue asks.
+- Fast kill decisions.
+- Measured by shipped outputs and customer evidence.
+
+Predictive variables:
+- Speed to first 25 conversations.
+- Ruthless kill discipline.
+- Consistent revenue ask repetition.
+- Deep-work protection.
+- Single-sector depth over shallow breadth.`
+      }
+    ]
+  }
 ];
 
 const ROADMAP_TEMPLATE = [
@@ -481,6 +796,23 @@ function createDefaultPlaybooks() {
   }));
 }
 
+function createDocumentLibrary() {
+  return DOCUMENT_LIBRARY_TEMPLATE.map((doc) => ({
+    id: doc.id,
+    title: doc.title,
+    sourceFile: doc.sourceFile,
+    sections: doc.sections.map((section) => ({
+      id: section.id,
+      title: section.title,
+      content: section.content,
+      createdAt: nowISO(),
+      updatedAt: nowISO()
+    })),
+    createdAt: nowISO(),
+    updatedAt: nowISO()
+  }));
+}
+
 function createFounderManualState() {
   return {
     brutalTruths: BRUTAL_TRUTHS.map((text, index) => ({
@@ -637,6 +969,7 @@ function createDefaultData() {
     },
     reports: [],
     logbook: [],
+    documents: createDocumentLibrary(),
     manual: createFounderManualState()
   };
 }
@@ -921,6 +1254,41 @@ function normalizeData(rawData) {
         updatedAt: entry.updatedAt || nowISO()
       }))
       : defaults.logbook,
+    documents: Array.isArray(raw.documents)
+      ? raw.documents.map((doc, docIndex) => {
+        const fallbackDoc = DOCUMENT_LIBRARY_TEMPLATE.find((item) => item.id === doc.id)
+          || DOCUMENT_LIBRARY_TEMPLATE[docIndex]
+          || { sections: [] };
+        const fallbackSections = Array.isArray(fallbackDoc.sections) ? fallbackDoc.sections : [];
+        return {
+          id: doc.id || fallbackDoc.id || uid('doc'),
+          title: doc.title || fallbackDoc.title || 'Untitled Document',
+          sourceFile: doc.sourceFile || fallbackDoc.sourceFile || '',
+          sections: Array.isArray(doc.sections)
+            ? doc.sections.map((section, sectionIndex) => {
+              const fallbackSection = fallbackSections.find((item) => item.id === section.id)
+                || fallbackSections[sectionIndex]
+                || {};
+              return {
+                id: section.id || fallbackSection.id || uid('section'),
+                title: section.title || fallbackSection.title || 'Untitled Section',
+                content: section.content || fallbackSection.content || '',
+                createdAt: section.createdAt || nowISO(),
+                updatedAt: section.updatedAt || nowISO()
+              };
+            })
+            : fallbackSections.map((section) => ({
+              id: section.id || uid('section'),
+              title: section.title || 'Untitled Section',
+              content: section.content || '',
+              createdAt: nowISO(),
+              updatedAt: nowISO()
+            })),
+          createdAt: doc.createdAt || nowISO(),
+          updatedAt: doc.updatedAt || nowISO()
+        };
+      })
+      : defaults.documents,
     manual: raw.manual && typeof raw.manual === 'object'
       ? {
         ...defaults.manual,
@@ -958,6 +1326,12 @@ function normalizeData(rawData) {
     const bKey = `${b.date} ${b.updatedAt || b.createdAt || ''}`;
     return bKey.localeCompare(aKey);
   });
+  merged.documents = Array.isArray(merged.documents) ? merged.documents.map((doc) => ({
+    ...doc,
+    sections: Array.isArray(doc.sections)
+      ? doc.sections.sort((a, b) => (a.createdAt || '').localeCompare(b.createdAt || ''))
+      : []
+  })) : [];
 
   return merged;
 }
@@ -3530,6 +3904,223 @@ function LogbookView({ data, updateData }) {
   );
 }
 
+function DocumentsLibraryView({ data, updateData }) {
+  const documents = Array.isArray(data.documents) ? data.documents : [];
+  const [activeDocId, setActiveDocId] = useState(documents[0]?.id || '');
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    if (!documents.length) {
+      setActiveDocId('');
+      return;
+    }
+    const exists = documents.some((doc) => doc.id === activeDocId);
+    if (!exists) setActiveDocId(documents[0].id);
+  }, [documents, activeDocId]);
+
+  const activeDoc = documents.find((doc) => doc.id === activeDocId) || null;
+
+  const filteredSections = useMemo(() => {
+    if (!activeDoc || !Array.isArray(activeDoc.sections)) return [];
+    const query = search.trim().toLowerCase();
+    if (!query) return activeDoc.sections;
+    return activeDoc.sections.filter((section) => (
+      `${section.title} ${section.content}`.toLowerCase().includes(query)
+    ));
+  }, [activeDoc, search]);
+
+  function updateDocField(docId, field, value) {
+    updateData((draft) => {
+      const docs = Array.isArray(draft.documents) ? draft.documents : [];
+      const target = docs.find((doc) => doc.id === docId);
+      if (!target) return;
+      target[field] = value;
+      target.updatedAt = nowISO();
+    });
+  }
+
+  function updateSectionField(docId, sectionId, field, value) {
+    updateData((draft) => {
+      const docs = Array.isArray(draft.documents) ? draft.documents : [];
+      const targetDoc = docs.find((doc) => doc.id === docId);
+      if (!targetDoc || !Array.isArray(targetDoc.sections)) return;
+      const targetSection = targetDoc.sections.find((section) => section.id === sectionId);
+      if (!targetSection) return;
+      targetSection[field] = value;
+      targetSection.updatedAt = nowISO();
+      targetDoc.updatedAt = nowISO();
+    });
+  }
+
+  function addSection(docId) {
+    updateData((draft) => {
+      const docs = Array.isArray(draft.documents) ? draft.documents : [];
+      const target = docs.find((doc) => doc.id === docId);
+      if (!target) return;
+      if (!Array.isArray(target.sections)) target.sections = [];
+      target.sections.push({
+        id: uid('section'),
+        title: `New Section ${target.sections.length + 1}`,
+        content: '',
+        createdAt: nowISO(),
+        updatedAt: nowISO()
+      });
+      target.updatedAt = nowISO();
+    });
+  }
+
+  function deleteSection(docId, sectionId) {
+    if (!window.confirm('Delete this section?')) return;
+    updateData((draft) => {
+      const docs = Array.isArray(draft.documents) ? draft.documents : [];
+      const targetDoc = docs.find((doc) => doc.id === docId);
+      if (!targetDoc || !Array.isArray(targetDoc.sections)) return;
+      targetDoc.sections = targetDoc.sections.filter((section) => section.id !== sectionId);
+      targetDoc.updatedAt = nowISO();
+    });
+  }
+
+  function addDocument() {
+    const name = window.prompt('Document title');
+    if (!name || !name.trim()) return;
+    const nextId = uid('doc');
+    updateData((draft) => {
+      if (!Array.isArray(draft.documents)) draft.documents = [];
+      draft.documents.push({
+        id: nextId,
+        title: name.trim(),
+        sourceFile: 'Custom Document',
+        sections: [
+          {
+            id: uid('section'),
+            title: 'New Section 1',
+            content: '',
+            createdAt: nowISO(),
+            updatedAt: nowISO()
+          }
+        ],
+        createdAt: nowISO(),
+        updatedAt: nowISO()
+      });
+    });
+    setActiveDocId(nextId);
+  }
+
+  function deleteDocument(docId) {
+    if (!window.confirm('Delete this document and all its sections?')) return;
+    updateData((draft) => {
+      const docs = Array.isArray(draft.documents) ? draft.documents : [];
+      draft.documents = docs.filter((doc) => doc.id !== docId);
+    });
+  }
+
+  function restoreTemplateDocs() {
+    if (!window.confirm('Restore template docs from Founder_Operating_System.docx and Zero_To_Founder_War_Mode.docx? This keeps your current data in other modules.')) return;
+    updateData((draft) => {
+      draft.documents = createDocumentLibrary();
+    });
+  }
+
+  return (
+    <div className="space-y-4 animate-slideFade">
+      <section className="card-panel p-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div>
+            <h3 className="font-heading text-lg font-semibold">Document Sections Library</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Both uploaded files are loaded as editable and deletable sections.</p>
+          </div>
+          <div className="flex gap-2">
+            <button className="btn-secondary" onClick={restoreTemplateDocs}>Restore Templates</button>
+            <button className="btn-primary" onClick={addDocument}>Add Document</button>
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[280px_1fr]">
+        <aside className="card-panel p-3">
+          <h4 className="font-heading text-sm font-semibold mb-2">Documents</h4>
+          <div className="space-y-2">
+            {documents.length ? documents.map((doc) => (
+              <button
+                key={doc.id}
+                className={`w-full text-left rounded-lg border px-3 py-2 ${activeDocId === doc.id ? 'border-brand-500 bg-brand-50 dark:bg-brand-900/20' : 'border-slate-200 dark:border-slate-700'}`}
+                onClick={() => setActiveDocId(doc.id)}
+              >
+                <p className="font-medium text-sm">{doc.title}</p>
+                <p className="text-xs text-slate-500 mt-1">{doc.sourceFile || 'Custom Document'}</p>
+                <p className="text-xs text-slate-500">{Array.isArray(doc.sections) ? doc.sections.length : 0} sections</p>
+              </button>
+            )) : (
+              <p className="text-sm text-slate-500">No documents yet.</p>
+            )}
+          </div>
+        </aside>
+
+        <div className="card-panel p-4">
+          {activeDoc ? (
+            <div className="space-y-3">
+              <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+                <div>
+                  <label className="text-xs uppercase tracking-wide text-slate-500">Document title</label>
+                  <input
+                    className="input-field mt-1"
+                    value={activeDoc.title || ''}
+                    onChange={(event) => updateDocField(activeDoc.id, 'title', event.target.value)}
+                  />
+                </div>
+                <div className="self-end">
+                  <button className="btn-danger" onClick={() => deleteDocument(activeDoc.id)}>Delete Document</button>
+                </div>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-[1fr_auto]">
+                <input
+                  className="input-field"
+                  value={activeDoc.sourceFile || ''}
+                  onChange={(event) => updateDocField(activeDoc.id, 'sourceFile', event.target.value)}
+                  placeholder="Source file name"
+                />
+                <button className="btn-primary" onClick={() => addSection(activeDoc.id)}>Add Section</button>
+              </div>
+
+              <input
+                className="input-field"
+                placeholder="Search section title/content..."
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+
+              <div className="space-y-3">
+                {filteredSections.length ? filteredSections.map((section) => (
+                  <article key={section.id} className="rounded-lg border border-slate-200 dark:border-slate-700 p-3">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <input
+                        className="input-field"
+                        value={section.title || ''}
+                        onChange={(event) => updateSectionField(activeDoc.id, section.id, 'title', event.target.value)}
+                      />
+                      <button className="btn-danger" onClick={() => deleteSection(activeDoc.id, section.id)}>Delete</button>
+                    </div>
+                    <textarea
+                      className="input-field min-h-44"
+                      value={section.content || ''}
+                      onChange={(event) => updateSectionField(activeDoc.id, section.id, 'content', event.target.value)}
+                    />
+                  </article>
+                )) : (
+                  <p className="text-sm text-slate-500">No sections matched your search.</p>
+                )}
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-500">Select a document to edit sections.</p>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function FounderManualView({ data, updateData }) {
   const [tab, setTab] = useState('truths');
   const manual = data.manual || createFounderManualState();
@@ -4258,6 +4849,8 @@ function App() {
 
           <div className="px-4 md:px-6 py-5 space-y-6">
             {activeView === 'logbook' ? <LogbookView data={data} updateData={updateData} /> : null}
+
+            {activeView === 'documents' ? <DocumentsLibraryView data={data} updateData={updateData} /> : null}
 
             {activeView === 'manual' ? <FounderManualView data={data} updateData={updateData} /> : null}
 
