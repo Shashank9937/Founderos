@@ -4,6 +4,7 @@ const STORAGE_KEY = 'founder_os_v1';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: '🏠' },
+  { id: 'nonnegotiables', label: 'Non-Negotiables', icon: '✅' },
   { id: 'logbook', label: 'Logbook', icon: '📝' },
   { id: 'documents', label: 'Doc Sections', icon: '🗃' },
   { id: 'manual', label: 'Founder Manual', icon: '📘' },
@@ -1962,7 +1963,8 @@ function DashboardView({
       <section className="grid gap-4 lg:grid-cols-3">
         <article className="card-panel p-4 lg:col-span-2">
           <h3 className="font-heading text-lg font-semibold mb-3">Quick Actions</h3>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            <button className="btn-primary" onClick={() => setActiveView('nonnegotiables')}>Open Non-Negotiables</button>
             <button className="btn-primary" onClick={() => setActiveView('metrics')}>Update Metrics</button>
             <button className="btn-secondary" onClick={() => setActiveView('decisions')}>Log Decision</button>
             <button className="btn-secondary" onClick={() => setActiveView('knowledge')}>Add Journal</button>
@@ -1986,6 +1988,148 @@ function DashboardView({
             ))}
           </div>
         </article>
+      </section>
+    </div>
+  );
+}
+
+function NonNegotiablesView({ data, updateData }) {
+  const [nonNegotiableDraft, setNonNegotiableDraft] = useState({ title: '', description: '' });
+  const todayKey = toDateISO();
+  const nonNegotiables = Array.isArray(data.dashboard.nonNegotiables) ? data.dashboard.nonNegotiables : [];
+  const nonNegotiableDoneCount = nonNegotiables.filter((item) => Array.isArray(item.completionDates) && item.completionDates.includes(todayKey)).length;
+  const nonNegotiableProgress = nonNegotiables.length
+    ? Math.round((nonNegotiableDoneCount / nonNegotiables.length) * 100)
+    : 0;
+
+  return (
+    <div className="space-y-4 animate-slideFade">
+      <section className="card-panel p-4">
+        <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+          <div>
+            <h3 className="font-heading text-lg font-semibold">Daily Non-Negotiables</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Recurring daily todo list from your operating docs. Complete today, reset tomorrow automatically.</p>
+          </div>
+          <span className="metric-pill">{nonNegotiableDoneCount}/{nonNegotiables.length || 0} done today</span>
+        </div>
+
+        <div className="space-y-2">
+          {nonNegotiables.length === 0 ? <p className="text-sm text-slate-500">No non-negotiables yet. Add your first one.</p> : null}
+          {nonNegotiables.map((item) => {
+            const doneToday = Array.isArray(item.completionDates) && item.completionDates.includes(todayKey);
+            const streak = getDateStreak(item.completionDates, todayKey);
+            return (
+              <div key={item.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={doneToday}
+                    onChange={(event) => {
+                      const checked = event.target.checked;
+                      updateData((draft) => {
+                        const list = Array.isArray(draft.dashboard.nonNegotiables) ? draft.dashboard.nonNegotiables : [];
+                        const target = list.find((entry) => entry.id === item.id);
+                        if (!target) return;
+                        const set = new Set(normalizeDateList(target.completionDates));
+                        if (checked) set.add(todayKey);
+                        else set.delete(todayKey);
+                        target.completionDates = normalizeDateList([...set]);
+                        target.updatedAt = nowISO();
+                      });
+                    }}
+                    className="h-5 w-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  />
+                  <div className="flex-1 grid gap-2 md:grid-cols-[1fr_1.2fr]">
+                    <input
+                      className="input-field"
+                      value={item.title}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        updateData((draft) => {
+                          const target = draft.dashboard.nonNegotiables.find((entry) => entry.id === item.id);
+                          if (!target) return;
+                          target.title = value;
+                          target.updatedAt = nowISO();
+                        });
+                      }}
+                      placeholder="Non-negotiable task"
+                    />
+                    <input
+                      className="input-field"
+                      value={item.description || ''}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        updateData((draft) => {
+                          const target = draft.dashboard.nonNegotiables.find((entry) => entry.id === item.id);
+                          if (!target) return;
+                          target.description = value;
+                          target.updatedAt = nowISO();
+                        });
+                      }}
+                      placeholder="Success criteria"
+                    />
+                  </div>
+                  <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 min-w-[70px] text-center">{streak}d streak</span>
+                  <button
+                    className="btn-danger px-3 py-1.5"
+                    onClick={() => {
+                      if (!window.confirm('Delete this non-negotiable?')) return;
+                      updateData((draft) => {
+                        draft.dashboard.nonNegotiables = draft.dashboard.nonNegotiables.filter((entry) => entry.id !== item.id);
+                      });
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="mt-3 grid gap-2 md:grid-cols-[1fr_1.2fr_auto]">
+          <input
+            className="input-field"
+            placeholder="Add new non-negotiable"
+            value={nonNegotiableDraft.title}
+            onChange={(event) => setNonNegotiableDraft((prev) => ({ ...prev, title: event.target.value }))}
+          />
+          <input
+            className="input-field"
+            placeholder="Success criteria / output"
+            value={nonNegotiableDraft.description}
+            onChange={(event) => setNonNegotiableDraft((prev) => ({ ...prev, description: event.target.value }))}
+          />
+          <button
+            className="btn-primary"
+            onClick={() => {
+              const title = nonNegotiableDraft.title.trim();
+              if (!title) return;
+              updateData((draft) => {
+                if (!Array.isArray(draft.dashboard.nonNegotiables)) draft.dashboard.nonNegotiables = [];
+                draft.dashboard.nonNegotiables.push({
+                  id: uid('nn'),
+                  title,
+                  description: nonNegotiableDraft.description.trim(),
+                  completionDates: [],
+                  createdAt: nowISO(),
+                  updatedAt: nowISO()
+                });
+              });
+              setNonNegotiableDraft({ title: '', description: '' });
+            }}
+          >
+            Add
+          </button>
+        </div>
+
+        <div className="mt-4">
+          <div className="flex justify-between text-sm mb-1 text-slate-600 dark:text-slate-300">
+            <span>Today&apos;s non-negotiable completion</span>
+            <span>{nonNegotiableProgress}%</span>
+          </div>
+          <ProgressBar progress={nonNegotiableProgress} />
+        </div>
       </section>
     </div>
   );
@@ -5108,6 +5252,8 @@ function App() {
           </header>
 
           <div className="px-4 md:px-6 py-5 space-y-6">
+            {activeView === 'nonnegotiables' ? <NonNegotiablesView data={data} updateData={updateData} /> : null}
+
             {activeView === 'logbook' ? <LogbookView data={data} updateData={updateData} /> : null}
 
             {activeView === 'documents' ? <DocumentsLibraryView data={data} updateData={updateData} /> : null}
