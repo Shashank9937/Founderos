@@ -22,5 +22,6 @@ Then open: http://localhost:3000
 
 ## Render deploy notes
 
-- Keep a persistent disk mounted and set `DB_PATH` to that disk, for example: `/var/data/founder-os.db`
+- This repo now includes `render.yaml` for Docker deploys.
+- Keep a persistent disk mounted and set `DB_PATH` to that disk, default: `/var/data/founder-os.db`
 - Use `Pull Sync` and `Push Sync` in the UI to sync local browser data with the server database
