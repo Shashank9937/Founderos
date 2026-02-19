@@ -181,6 +181,59 @@ const MONTHLY_REVIEW_CHECKS = [
   { id: 'mr5', text: 'Identify highest-leverage activity for next month.' }
 ];
 
+const NON_NEGOTIABLES_TEMPLATE = [
+  {
+    id: 'nn_hydration',
+    title: 'Hydration before 06:00',
+    description: 'Drink first 500ml water before screens.'
+  },
+  {
+    id: 'nn_exercise',
+    title: '30-min physical block',
+    description: 'Run, weights, or mobility completed.'
+  },
+  {
+    id: 'nn_dw1',
+    title: 'Deep Work Block 1 output',
+    description: 'One concrete startup deliverable by DW1 lock.'
+  },
+  {
+    id: 'nn_dw2',
+    title: 'Deep Work Block 2 output',
+    description: 'One concrete validation/output deliverable by DW2 lock.'
+  },
+  {
+    id: 'nn_outreach',
+    title: '10 outreach messages sent',
+    description: 'Cold/warm outreach completed.'
+  },
+  {
+    id: 'nn_followups',
+    title: '5 follow-ups completed',
+    description: 'Active conversation follow-ups sent.'
+  },
+  {
+    id: 'nn_conversations',
+    title: '2 operator/customer conversations',
+    description: 'Documented with notes and signals.'
+  },
+  {
+    id: 'nn_skill_block',
+    title: '30-min skill/domain block',
+    description: 'Learning block completed with one applied insight.'
+  },
+  {
+    id: 'nn_dashboard',
+    title: '17:00 dashboard review',
+    description: 'KPIs logged and tomorrow 3 outputs set.'
+  },
+  {
+    id: 'nn_shutdown',
+    title: 'Night shutdown protocol',
+    description: 'Shutdown checklist done and sleep window protected.'
+  }
+];
+
 const DOCUMENT_LIBRARY_TEMPLATE = [
   {
     id: 'doc_founder_operating_system',
@@ -734,6 +787,31 @@ function formatDateTime(value) {
   return date.toLocaleString();
 }
 
+function normalizeDateList(values) {
+  const unique = new Set();
+  if (Array.isArray(values)) {
+    values.forEach((value) => {
+      const date = String(value || '').slice(0, 10);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(date)) unique.add(date);
+    });
+  }
+  return [...unique].sort().slice(-400);
+}
+
+function getDateStreak(values, fromDate = toDateISO()) {
+  const dateSet = new Set(normalizeDateList(values));
+  const cursor = new Date(`${fromDate}T00:00:00`);
+  if (Number.isNaN(cursor.getTime())) return 0;
+  let streak = 0;
+  while (true) {
+    const key = cursor.toISOString().slice(0, 10);
+    if (!dateSet.has(key)) break;
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
 function statusClass(status) {
   if (status === 'Complete') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300';
   if (status === 'In Progress') return 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300';
@@ -791,6 +869,17 @@ function createDefaultPlaybooks() {
     type,
     title: `${type} Playbook`,
     content: '',
+    createdAt: nowISO(),
+    updatedAt: nowISO()
+  }));
+}
+
+function createDefaultNonNegotiables() {
+  return NON_NEGOTIABLES_TEMPLATE.map((item) => ({
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    completionDates: [],
     createdAt: nowISO(),
     updatedAt: nowISO()
   }));
@@ -899,7 +988,8 @@ function createDefaultData() {
         { id: uid('goal'), text: 'Speak with 10 customers this week', completed: false, createdAt: nowISO(), updatedAt: nowISO() },
         { id: uid('goal'), text: 'Ship one high-impact product improvement', completed: false, createdAt: nowISO(), updatedAt: nowISO() },
         { id: uid('goal'), text: 'Run one growth experiment end-to-end', completed: false, createdAt: nowISO(), updatedAt: nowISO() }
-      ]
+      ],
+      nonNegotiables: createDefaultNonNegotiables()
     },
     metricsSnapshots: [
       {
@@ -1058,7 +1148,22 @@ function normalizeData(rawData) {
           createdAt: goal.createdAt || nowISO(),
           updatedAt: goal.updatedAt || nowISO()
         }))
-        : defaults.dashboard.weeklyGoals
+        : defaults.dashboard.weeklyGoals,
+      nonNegotiables: Array.isArray(raw.dashboard?.nonNegotiables)
+        ? raw.dashboard.nonNegotiables.map((item, index) => {
+          const fallback = NON_NEGOTIABLES_TEMPLATE.find((entry) => entry.id === item.id)
+            || NON_NEGOTIABLES_TEMPLATE[index]
+            || {};
+          return {
+            id: item.id || fallback.id || uid('nn'),
+            title: item.title || fallback.title || '',
+            description: item.description || fallback.description || '',
+            completionDates: normalizeDateList(item.completionDates),
+            createdAt: item.createdAt || nowISO(),
+            updatedAt: item.updatedAt || nowISO()
+          };
+        })
+        : defaults.dashboard.nonNegotiables
     },
     metricsSnapshots: Array.isArray(raw.metricsSnapshots) && raw.metricsSnapshots.length
       ? raw.metricsSnapshots.map((snap) => {
@@ -1412,7 +1517,12 @@ function getConsistencyScore(data) {
   const rhythmCompletion = getCurrentWeekRhythmCompletion(data.weeklyRhythm.logs) / 100;
   const currentWeekHours = data.learning.learningHours.find((entry) => entry.weekStart === toWeekStartISO());
   const learningCompletion = Math.min(num(currentWeekHours?.hours) / 10, 1);
-  return Math.round((goalCompletion * 0.4 + rhythmCompletion * 0.4 + learningCompletion * 0.2) * 100);
+  const today = toDateISO();
+  const nonNegotiables = Array.isArray(data.dashboard.nonNegotiables) ? data.dashboard.nonNegotiables : [];
+  const nonNegotiableCompletion = nonNegotiables.length
+    ? nonNegotiables.filter((item) => Array.isArray(item.completionDates) && item.completionDates.includes(today)).length / nonNegotiables.length
+    : 0;
+  return Math.round((goalCompletion * 0.3 + rhythmCompletion * 0.3 + learningCompletion * 0.2 + nonNegotiableCompletion * 0.2) * 100);
 }
 
 function buildAutomatedWeeklySummary(data, weekStart) {
@@ -1437,6 +1547,11 @@ function createReport(data, type) {
   const weekStart = toWeekStartISO();
   const month = toMonthISO();
   const weeklyCompletion = getCurrentWeekRhythmCompletion(data.weeklyRhythm.logs);
+  const today = toDateISO();
+  const nonNegotiables = Array.isArray(data.dashboard.nonNegotiables) ? data.dashboard.nonNegotiables : [];
+  const nonNegotiablesToday = nonNegotiables.length
+    ? Math.round((nonNegotiables.filter((item) => Array.isArray(item.completionDates) && item.completionDates.includes(today)).length / nonNegotiables.length) * 100)
+    : 0;
   const report = {
     id: uid('report'),
     type,
@@ -1453,6 +1568,7 @@ function createReport(data, type) {
       weeklyGoalCompletion: data.dashboard.weeklyGoals.length
         ? Math.round((data.dashboard.weeklyGoals.filter((goal) => goal.completed).length / data.dashboard.weeklyGoals.length) * 100)
         : 0,
+      nonNegotiablesTodayCompletion: nonNegotiablesToday,
       rhythmCompletion: weeklyCompletion,
       booksRead: data.learning.booksRead,
       modelsMastered: data.learning.mentalModelsMastered.length
@@ -1584,10 +1700,17 @@ function DashboardView({
   rhythmStreak,
   consistencyScore
 }) {
+  const [nonNegotiableDraft, setNonNegotiableDraft] = useState({ title: '', description: '' });
   const topGoals = data.dashboard.weeklyGoals.slice(0, 3);
+  const todayKey = toDateISO();
+  const nonNegotiables = Array.isArray(data.dashboard.nonNegotiables) ? data.dashboard.nonNegotiables : [];
 
   const goalCompletion = topGoals.length
     ? Math.round((topGoals.filter((goal) => goal.completed).length / topGoals.length) * 100)
+    : 0;
+  const nonNegotiableDoneCount = nonNegotiables.filter((item) => Array.isArray(item.completionDates) && item.completionDates.includes(todayKey)).length;
+  const nonNegotiableProgress = nonNegotiables.length
+    ? Math.round((nonNegotiableDoneCount / nonNegotiables.length) * 100)
     : 0;
 
   return (
@@ -1598,7 +1721,7 @@ function DashboardView({
         <MetricCard title="MoM Growth" value={formatPct(latestSnapshot?.momGrowth || 0)} subtitle="Month-over-month" tone={num(latestSnapshot?.momGrowth) > 10 ? 'good' : num(latestSnapshot?.momGrowth) >= 0 ? 'warn' : 'bad'} />
         <MetricCard title="Runway" value={`${round(latestSnapshot?.runwayMonths || 0, 1)} months`} subtitle={`Burn ${formatMoney(latestSnapshot?.burnRate || 0)}/mo`} tone={num(latestSnapshot?.runwayMonths) >= 12 ? 'good' : num(latestSnapshot?.runwayMonths) >= 6 ? 'warn' : 'bad'} />
         <MetricCard title="Customer Conversations" value={latestSnapshot?.conversations || 0} subtitle="This week" />
-        <MetricCard title="Consistency Score" value={`${consistencyScore}%`} subtitle="Goals + rhythm + learning" tone={consistencyScore >= 75 ? 'good' : consistencyScore >= 45 ? 'warn' : 'bad'} />
+        <MetricCard title="Consistency Score" value={`${consistencyScore}%`} subtitle="Goals + non-negotiables + rhythm + learning" tone={consistencyScore >= 75 ? 'good' : consistencyScore >= 45 ? 'warn' : 'bad'} />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-3">
@@ -1696,6 +1819,143 @@ function DashboardView({
             <MetricCard title="Journal Streak" value={`${journalStreak}d`} subtitle="Daily entries" tone={journalStreak >= 7 ? 'good' : journalStreak >= 3 ? 'warn' : 'bad'} />
             <MetricCard title="Rhythm Streak" value={`${rhythmStreak}w`} subtitle="Full week cadence" tone={rhythmStreak >= 3 ? 'good' : rhythmStreak >= 1 ? 'warn' : 'bad'} />
           </div>
+        </article>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        <article className="card-panel p-4 lg:col-span-2">
+          <div className="flex items-center justify-between gap-3 mb-3 flex-wrap">
+            <div>
+              <h3 className="font-heading text-lg font-semibold">Daily Non-Negotiables</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Doc-driven recurring todos. If you complete today, it automatically resets tomorrow.</p>
+            </div>
+            <span className="metric-pill">{nonNegotiableDoneCount}/{nonNegotiables.length || 0} done today</span>
+          </div>
+
+          <div className="space-y-2">
+            {nonNegotiables.length === 0 ? <p className="text-sm text-slate-500">No non-negotiables yet. Add your first one.</p> : null}
+            {nonNegotiables.map((item) => {
+              const doneToday = Array.isArray(item.completionDates) && item.completionDates.includes(todayKey);
+              const streak = getDateStreak(item.completionDates, todayKey);
+              return (
+                <div key={item.id} className="rounded-xl border border-slate-200 dark:border-slate-700 p-3">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={doneToday}
+                      onChange={(event) => {
+                        const checked = event.target.checked;
+                        updateData((draft) => {
+                          const list = Array.isArray(draft.dashboard.nonNegotiables) ? draft.dashboard.nonNegotiables : [];
+                          const target = list.find((entry) => entry.id === item.id);
+                          if (!target) return;
+                          const set = new Set(normalizeDateList(target.completionDates));
+                          if (checked) set.add(todayKey);
+                          else set.delete(todayKey);
+                          target.completionDates = normalizeDateList([...set]);
+                          target.updatedAt = nowISO();
+                        });
+                      }}
+                      className="h-5 w-5 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                    />
+                    <div className="flex-1 grid gap-2 md:grid-cols-[1fr_1.2fr]">
+                      <input
+                        className="input-field"
+                        value={item.title}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          updateData((draft) => {
+                            const target = draft.dashboard.nonNegotiables.find((entry) => entry.id === item.id);
+                            if (!target) return;
+                            target.title = value;
+                            target.updatedAt = nowISO();
+                          });
+                        }}
+                        placeholder="Non-negotiable task"
+                      />
+                      <input
+                        className="input-field"
+                        value={item.description || ''}
+                        onChange={(event) => {
+                          const value = event.target.value;
+                          updateData((draft) => {
+                            const target = draft.dashboard.nonNegotiables.find((entry) => entry.id === item.id);
+                            if (!target) return;
+                            target.description = value;
+                            target.updatedAt = nowISO();
+                          });
+                        }}
+                        placeholder="Success criteria"
+                      />
+                    </div>
+                    <span className="text-xs px-2 py-1 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300 min-w-[70px] text-center">{streak}d streak</span>
+                    <button
+                      className="btn-danger px-3 py-1.5"
+                      onClick={() => {
+                        if (!window.confirm('Delete this non-negotiable?')) return;
+                        updateData((draft) => {
+                          draft.dashboard.nonNegotiables = draft.dashboard.nonNegotiables.filter((entry) => entry.id !== item.id);
+                        });
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-3 grid gap-2 md:grid-cols-[1fr_1.2fr_auto]">
+            <input
+              className="input-field"
+              placeholder="Add new non-negotiable"
+              value={nonNegotiableDraft.title}
+              onChange={(event) => setNonNegotiableDraft((prev) => ({ ...prev, title: event.target.value }))}
+            />
+            <input
+              className="input-field"
+              placeholder="Success criteria / output"
+              value={nonNegotiableDraft.description}
+              onChange={(event) => setNonNegotiableDraft((prev) => ({ ...prev, description: event.target.value }))}
+            />
+            <button
+              className="btn-primary"
+              onClick={() => {
+                const title = nonNegotiableDraft.title.trim();
+                if (!title) return;
+                updateData((draft) => {
+                  if (!Array.isArray(draft.dashboard.nonNegotiables)) draft.dashboard.nonNegotiables = [];
+                  draft.dashboard.nonNegotiables.push({
+                    id: uid('nn'),
+                    title,
+                    description: nonNegotiableDraft.description.trim(),
+                    completionDates: [],
+                    createdAt: nowISO(),
+                    updatedAt: nowISO()
+                  });
+                });
+                setNonNegotiableDraft({ title: '', description: '' });
+              }}
+            >
+              Add
+            </button>
+          </div>
+
+          <div className="mt-4">
+            <div className="flex justify-between text-sm mb-1 text-slate-600 dark:text-slate-300">
+              <span>Today&apos;s non-negotiable completion</span>
+              <span>{nonNegotiableProgress}%</span>
+            </div>
+            <ProgressBar progress={nonNegotiableProgress} />
+          </div>
+        </article>
+
+        <article className="card-panel p-4 space-y-2">
+          <h3 className="font-heading text-lg font-semibold">How It Works</h3>
+          <p className="text-sm text-slate-600 dark:text-slate-300">Completion is tracked by date, so each task becomes available again every new day.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300">Default items are based on your two uploaded playbooks and war-mode system.</p>
+          <p className="text-sm text-slate-600 dark:text-slate-300">Add your own non-negotiables and keep only what drives execution.</p>
         </article>
       </section>
 
