@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { AgentStatus, StrategyEntryType } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { recommendationLabel } from "@/lib/calculations";
@@ -15,44 +16,88 @@ function asNumber(value: unknown, fallback = 0) {
   return fallback;
 }
 
-export async function getDashboardSummary(userId: string) {
+async function buildDashboardSummary(userId: string) {
   const [agents, logs, automationScores, lessons, lessonProgress, financialMetrics, leverageScores, goals, strategyEntries] =
     await Promise.all([
       prisma.agent.findMany({
         where: { userId },
-        orderBy: { updatedAt: "desc" },
+        select: { id: true, status: true },
       }),
       prisma.agentLog.findMany({
         where: { userId },
         orderBy: { updatedAt: "desc" },
         take: 12,
+        select: {
+          id: true,
+          agentName: true,
+          status: true,
+          triggerType: true,
+          timeSavedPerWeek: true,
+          lessonsLearned: true,
+        },
       }),
       prisma.automationScore.findMany({
         where: { userId },
         orderBy: { createdAt: "asc" },
+        select: {
+          score: true,
+          createdAt: true,
+          recommendation: true,
+          taskName: true,
+        },
       }),
-      prisma.lesson.findMany(),
+      prisma.lesson.count(),
       prisma.lessonProgress.findMany({
         where: { userId },
+        select: { completed: true },
       }),
       prisma.financialMetric.findMany({
         where: { userId },
         orderBy: { periodStart: "asc" },
         take: 12,
+        select: {
+          periodStart: true,
+          mrr: true,
+          burnRate: true,
+          runwayMonths: true,
+        },
       }),
       prisma.leverageScore.findMany({
         where: { userId },
         orderBy: { periodStart: "asc" },
         take: 12,
+        select: {
+          periodStart: true,
+          leverageScore: true,
+          automationCoverage: true,
+          systemsBuiltCount: true,
+        },
       }),
       prisma.goal.findMany({
         where: { userId },
-        include: { kpis: true },
+        select: {
+          id: true,
+          title: true,
+          status: true,
+          progress: true,
+          _count: { select: { kpis: true } },
+        },
         orderBy: { updatedAt: "desc" },
       }),
       prisma.strategyEntry.findMany({
-        where: { userId },
+        where: {
+          userId,
+          entryType: {
+            in: [StrategyEntryType.DEBUG_DIAGNOSTIC, StrategyEntryType.ROI_OPPORTUNITY],
+          },
+        },
         orderBy: { createdAt: "desc" },
+        take: 10,
+        select: {
+          title: true,
+          entryType: true,
+          content: true,
+        },
       }),
     ]);
 
@@ -69,7 +114,7 @@ export async function getDashboardSummary(userId: string) {
   const latestLeverage = leverageScores.at(-1);
 
   const completedLessons = lessonProgress.filter((entry) => entry.completed).length;
-  const totalLessons = lessons.length;
+  const totalLessons = lessons;
   const learningCompletionPercent = totalLessons > 0 ? Number(((completedLessons / totalLessons) * 100).toFixed(1)) : 0;
 
   const avgAutomationScore =
@@ -77,9 +122,7 @@ export async function getDashboardSummary(userId: string) {
       ? Number((automationScores.reduce((sum, item) => sum + item.score, 0) / automationScores.length).toFixed(1))
       : 0;
 
-  const totalTimeSavedPerWeek = Number(
-    logs.reduce((sum, item) => sum + item.timeSavedPerWeek, 0).toFixed(1),
-  );
+  const totalTimeSavedPerWeek = Number(logs.reduce((sum, item) => sum + item.timeSavedPerWeek, 0).toFixed(1));
 
   const recentDebug = strategyEntries.find((entry) => entry.entryType === StrategyEntryType.DEBUG_DIAGNOSTIC);
   const roiEntry = strategyEntries.find((entry) => entry.entryType === StrategyEntryType.ROI_OPPORTUNITY);
@@ -118,17 +161,11 @@ export async function getDashboardSummary(userId: string) {
         runway: entry.runwayMonths,
       })),
     },
-    recentLogs: logs.map((log) => ({
-      id: log.id,
-      agentName: log.agentName,
-      status: log.status,
-      triggerType: log.triggerType,
-      timeSavedPerWeek: log.timeSavedPerWeek,
-      lessonsLearned: log.lessonsLearned,
-    })),
+    recentLogs: logs,
     opportunities:
       roiEntry && typeof roiEntry.content === "object" && roiEntry.content
-        ? ((roiEntry.content as { ranked?: Array<{ task?: string; roiScore?: number; estimatedHours?: number }> }).ranked ?? [])
+        ? ((roiEntry.content as { ranked?: Array<{ task?: string; roiScore?: number; estimatedHours?: number }> })
+            .ranked ?? [])
             .map((item) => ({
               task: item.task ?? "Unnamed task",
               roiScore: asNumber(item.roiScore),
@@ -141,20 +178,36 @@ export async function getDashboardSummary(userId: string) {
       title: goal.title,
       status: goal.status,
       progress: goal.progress,
-      kpiCount: goal.kpis.length,
+      kpiCount: goal._count.kpis,
     })),
     debugHighlight: recentDebug?.title ?? "No diagnostic recorded yet",
   };
 }
 
-export async function getRoadmapOpportunities(userId: string) {
+const getDashboardSummaryCached = unstable_cache(buildDashboardSummary, ["dashboard-summary"], {
+  revalidate: 20,
+});
+
+export async function getDashboardSummary(userId: string) {
+  return getDashboardSummaryCached(userId);
+}
+
+async function buildRoadmapOpportunities(userId: string) {
   const [scores, logs] = await Promise.all([
     prisma.automationScore.findMany({
       where: { userId },
-      include: { agent: true },
+      select: {
+        agentId: true,
+        taskName: true,
+        score: true,
+        recommendation: true,
+      },
       orderBy: { updatedAt: "desc" },
     }),
-    prisma.agentLog.findMany({ where: { userId } }),
+    prisma.agentLog.findMany({
+      where: { userId },
+      select: { agentId: true, timeSavedPerWeek: true },
+    }),
   ]);
 
   const logByAgent = new Map<string, number>();
@@ -182,4 +235,12 @@ export async function getRoadmapOpportunities(userId: string) {
     })
     .sort((a, b) => b.roi - a.roi)
     .slice(0, 5);
+}
+
+const getRoadmapOpportunitiesCached = unstable_cache(buildRoadmapOpportunities, ["roadmap-opportunities"], {
+  revalidate: 30,
+});
+
+export async function getRoadmapOpportunities(userId: string) {
+  return getRoadmapOpportunitiesCached(userId);
 }
