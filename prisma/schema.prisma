@@ -1,0 +1,363 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FOUNDER
+  OPERATOR
+  ANALYST
+  ADMIN
+}
+
+enum AgentType {
+  SINGLE_TASK
+  MULTI_STEP
+  MULTI_AGENT
+}
+
+enum AgentStatus {
+  LIVE
+  BUILDING
+  TESTING
+  PAUSED
+  FAILED
+  QUEUED
+}
+
+enum FailureScenarioType {
+  WRONG_OUTPUT_FORMAT
+  TOOL_FAILURE
+  HALLUCINATION
+  CONTEXT_MISINTERPRETATION
+  IRREVERSIBLE_ACTION_RISK
+}
+
+enum AutomationRecommendation {
+  DO_NOT_AUTOMATE
+  BUILD_SIMPLE_SCRIPT
+  BUILD_SINGLE_TASK_AGENT
+  BUILD_MULTI_STEP_AGENT
+}
+
+enum StrategyEntryType {
+  MARKET_SIZING
+  COMPETITIVE_MATRIX
+  SWOT
+  DEBUG_DIAGNOSTIC
+  ROI_OPPORTUNITY
+  GTM_ROADMAP
+  PRICING_EXPERIMENT
+  ICP_PROFILE
+  VALUE_PROPOSITION
+}
+
+enum GoalCategory {
+  EXECUTION
+  LEARNING
+  FINANCE
+  GROWTH
+  AI_SYSTEMS
+}
+
+enum GoalStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  AT_RISK
+  COMPLETED
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  passwordHash     String
+  fullName         String
+  role             Role              @default(FOUNDER)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  agents           Agent[]
+  agentLogs        AgentLog[]
+  automationScores AutomationScore[]
+  lessonProgress   LessonProgress[]
+  financialMetrics FinancialMetric[]
+  strategyEntries  StrategyEntry[]
+  leverageScores   LeverageScore[]
+  goals            Goal[]
+  kpis             KPI[]
+  saasPlans        SaaSPlan[]
+}
+
+model Agent {
+  id                            String             @id @default(cuid())
+  userId                        String
+  name                          String
+  whatItDoes                    String
+  agentType                     AgentType
+  triggerType                   String
+  status                        AgentStatus        @default(BUILDING)
+  perceptionDefinition          String
+  perceptionExamples            Json
+  brainModelLogic               String
+  decisionRules                 String
+  isDeterministic               Boolean
+  toolsUsed                     Json
+  manualApprovalRequired        Boolean            @default(false)
+  memoryShortTerm               String
+  memoryLongTerm                String
+  learningLoopEnabled           Boolean            @default(false)
+  inputSchema                   Json
+  outputSchema                  Json
+  outputExample                 String
+  workflowSteps                 Json
+  guardrails                    Json
+  fallbackBehavior              String
+  destructiveActionConfirmation Boolean            @default(true)
+  timeSavedPerWeek              Float              @default(0)
+  createdAt                     DateTime           @default(now())
+  updatedAt                     DateTime           @updatedAt
+  user                          User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs                          AgentLog[]
+  workflows                     AgentWorkflow[]
+  failureModes                  AgentFailureMode[]
+  automationScores              AutomationScore[]
+
+  @@index([userId, createdAt])
+}
+
+model AgentLog {
+  id               String      @id @default(cuid())
+  userId           String
+  agentId          String?
+  agentName        String
+  whatItDoes       String
+  agentType        AgentType
+  toolsUsed        Json
+  triggerType      String
+  inputDefinition  String
+  outputDefinition String
+  status           AgentStatus
+  timeSavedPerWeek Float       @default(0)
+  failureNotes     String?
+  lessonsLearned   String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent            Agent?      @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([agentId])
+}
+
+model AgentWorkflow {
+  id             String   @id @default(cuid())
+  agentId        String
+  stepNumber     Int
+  stepTitle      String
+  stepDetail     String
+  inputContract  String
+  outputContract String
+  fallbackAction String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  agent          Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, stepNumber])
+  @@index([agentId])
+}
+
+model AgentFailureMode {
+  id                         String              @id @default(cuid())
+  agentId                    String
+  scenarioType               FailureScenarioType
+  scenarioDescription        String
+  likelyCause                String
+  guardrail                  String
+  manualConfirmationRequired Boolean             @default(false)
+  createdAt                  DateTime            @default(now())
+  updatedAt                  DateTime            @updatedAt
+  agent                      Agent               @relation(fields: [agentId], references: [id], onDelete: Cascade)
+
+  @@unique([agentId, scenarioType])
+  @@index([agentId])
+}
+
+model AutomationScore {
+  id                       String                   @id @default(cuid())
+  userId                   String
+  agentId                  String?
+  taskName                 String
+  doneThreePlusPerWeek     Boolean
+  predictableWorkflow      Boolean
+  clearInputsOutputs       Boolean
+  errorToleranceAcceptable Boolean
+  timeSavedMeaningful      Boolean
+  score                    Int
+  recommendation           AutomationRecommendation
+  notes                    String?
+  createdAt                DateTime                 @default(now())
+  updatedAt                DateTime                 @updatedAt
+  user                     User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  agent                    Agent?                   @relation(fields: [agentId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([agentId])
+}
+
+model LearningTrack {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  sortOrder   Int
+  lessons     Lesson[]
+}
+
+model Lesson {
+  id                     String           @id @default(cuid())
+  learningTrackId        String
+  title                  String
+  coreConcept            String
+  whyItMattersAtScale    String
+  tacticalImplementation String
+  commonFounderMistakes  String
+  executionChecklist     Json
+  reflectionPrompt       String
+  sortOrder              Int
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  learningTrack          LearningTrack    @relation(fields: [learningTrackId], references: [id], onDelete: Cascade)
+  progress               LessonProgress[]
+
+  @@index([learningTrackId, sortOrder])
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  lessonId    String
+  completed   Boolean   @default(false)
+  notes       String?
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson      Lesson    @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId])
+}
+
+model FinancialMetric {
+  id            String   @id @default(cuid())
+  userId        String
+  periodStart   DateTime
+  scenarioName  String   @default("Base")
+  revenue       Float
+  costStructure Float
+  grossMargin   Float
+  cac           Float
+  ltv           Float
+  burnRate      Float
+  runwayMonths  Float
+  arr           Float
+  mrr           Float
+  unitEconomics Json
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, periodStart])
+}
+
+model StrategyEntry {
+  id        String            @id @default(cuid())
+  userId    String
+  entryType StrategyEntryType
+  title     String
+  content   Json
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([entryType])
+}
+
+model LeverageScore {
+  id                       String   @id @default(cuid())
+  userId                   String
+  periodStart              DateTime
+  timeSaved                Float
+  revenueImpact            Float
+  automationDepth          Float
+  recurringRevenuePercent  Float
+  delegationScore          Float
+  founderDependencyPercent Float
+  leverageScore            Float
+  hoursReplaced            Float
+  automationCoverage       Float
+  revenuePerEmployee       Float
+  revenuePerHour           Float
+  systemsBuiltCount        Int
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+  user                     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, periodStart])
+}
+
+model Goal {
+  id          String       @id @default(cuid())
+  userId      String
+  title       String
+  description String?
+  category    GoalCategory
+  status      GoalStatus   @default(NOT_STARTED)
+  progress    Int          @default(0)
+  targetDate  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kpis        KPI[]
+
+  @@index([userId, createdAt])
+}
+
+model KPI {
+  id           String   @id @default(cuid())
+  userId       String
+  goalId       String
+  name         String
+  unit         String
+  currentValue Float
+  targetValue  Float
+  periodLabel  String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  goal         Goal     @relation(fields: [goalId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([goalId])
+}
+
+model SaaSPlan {
+  id                 String   @id @default(cuid())
+  userId             String
+  planName           String
+  icpDefinition      String
+  problemStatement   String
+  valueProposition   String
+  pricingExperiments Json
+  featureGates       Json
+  subscriptionTiers  Json
+  gtmRoadmap         Json
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
