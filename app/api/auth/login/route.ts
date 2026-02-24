@@ -4,6 +4,10 @@ import { prisma } from "@/lib/db/prisma";
 import { AUTH_COOKIE, signAuthToken } from "@/lib/auth/jwt";
 import { loginSchema } from "@/lib/validations/schemas";
 
+function appOrigin(request: NextRequest) {
+  return process.env.APP_URL ?? request.nextUrl.origin;
+}
+
 export async function POST(request: NextRequest) {
   const contentType = request.headers.get("content-type") ?? "";
   const isJson = contentType.includes("application/json");
@@ -25,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (isJson) {
       return NextResponse.json({ success: false, error: "Invalid credentials payload" }, { status: 400 });
     }
-    return NextResponse.redirect(new URL("/login?error=invalid_payload", request.url));
+    return NextResponse.redirect(new URL("/login?error=invalid_payload", appOrigin(request)));
   }
 
   const user = await prisma.user.findUnique({ where: { email: parsed.data.email } });
@@ -33,7 +37,7 @@ export async function POST(request: NextRequest) {
     if (isJson) {
       return NextResponse.json({ success: false, error: "Invalid email or password" }, { status: 401 });
     }
-    return NextResponse.redirect(new URL("/login?error=invalid_credentials", request.url));
+    return NextResponse.redirect(new URL("/login?error=invalid_credentials", appOrigin(request)));
   }
 
   const validPassword = await bcrypt.compare(parsed.data.password, user.passwordHash);
@@ -41,7 +45,7 @@ export async function POST(request: NextRequest) {
     if (isJson) {
       return NextResponse.json({ success: false, error: "Invalid email or password" }, { status: 401 });
     }
-    return NextResponse.redirect(new URL("/login?error=invalid_credentials", request.url));
+    return NextResponse.redirect(new URL("/login?error=invalid_credentials", appOrigin(request)));
   }
 
   const token = await signAuthToken({
@@ -51,7 +55,9 @@ export async function POST(request: NextRequest) {
     name: user.fullName,
   });
 
-  const response = isJson ? NextResponse.json({ success: true }) : NextResponse.redirect(new URL("/dashboard", request.url));
+  const response = isJson
+    ? NextResponse.json({ success: true })
+    : NextResponse.redirect(new URL("/dashboard", appOrigin(request)));
 
   response.cookies.set({
     name: AUTH_COOKIE,

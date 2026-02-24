@@ -20,7 +20,10 @@ export async function middleware(request: NextRequest) {
   const isPublic = publicPaths.some((route) => pathname.startsWith(route));
 
   if (!session && !isPublic) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const url = request.nextUrl.clone();
+    url.pathname = "/login";
+    url.search = "";
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
